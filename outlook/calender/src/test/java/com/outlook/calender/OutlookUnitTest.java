@@ -1,4 +1,4 @@
-package calender.outlook.com.outlook;
+package com.outlook.calender;
 
 import org.junit.Test;
 

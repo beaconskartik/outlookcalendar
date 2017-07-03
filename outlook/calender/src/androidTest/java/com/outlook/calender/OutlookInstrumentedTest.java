@@ -1,4 +1,4 @@
-package calender.outlook.com.outlook;
+package com.outlook.calender;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
@@ -21,6 +21,6 @@ public class OutlookInstrumentedTest {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getTargetContext();
 
-        assertEquals("calender.outlook.com.outlook", appContext.getPackageName());
+        assertEquals("com.outlook.calender", appContext.getPackageName());
     }
 }
