@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="DCMAnalyticsJava-3.0.1-34-SNAPSHOT">
+    <CLASSES>
+      <root url="file://$PROJECT_DIR$/../../../AdobeReader/build/android/AdobeReader/build/intermediates/exploded-aar/com.adobe/DCMAnalyticsJava/3.0.1-34-SNAPSHOT/res" />
+      <root url="jar://$PROJECT_DIR$/../../../AdobeReader/build/android/AdobeReader/build/intermediates/exploded-aar/com.adobe/DCMAnalyticsJava/3.0.1-34-SNAPSHOT/jars/classes.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

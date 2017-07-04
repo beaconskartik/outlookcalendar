@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -7,12 +8,14 @@
     tools:context="com.outlook.calender.OutlookActivityFragment"
     tools:showIn="@layout/activity_outlook">
 
-    <CalendarView
-        android:layout_width="368dp"
-        android:layout_height="439dp"
-        tools:layout_editor_absoluteY="8dp"
-        tools:layout_editor_absoluteX="8dp">
-    </CalendarView>
+    <com.outlook.calender.calender.OutlookCalender
+        android:id="@+id/calendar_view"
+        android:visibility="visible"
+        tools:visibility="visible"
+        android:elevation="@dimen/elevation"
+        android:background="?android:attr/colorBackground"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
 
     <!-- Agenda view will be added here -->
 

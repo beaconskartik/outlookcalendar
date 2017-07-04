@@ -2,8 +2,10 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/VirgoAndroid.iml" filepath="$PROJECT_DIR$/VirgoAndroid.iml" />
       <module fileurl="file://$PROJECT_DIR$/calender/calender.iml" filepath="$PROJECT_DIR$/calender/calender.iml" />
       <module fileurl="file://$PROJECT_DIR$/outlook.iml" filepath="$PROJECT_DIR$/outlook.iml" />
+      <module fileurl="file://$PROJECT_DIR$/virgo/virgo.iml" filepath="$PROJECT_DIR$/virgo/virgo.iml" />
     </modules>
   </component>
 </project>

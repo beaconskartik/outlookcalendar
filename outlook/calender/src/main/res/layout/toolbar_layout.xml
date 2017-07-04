@@ -22,7 +22,7 @@
             android:layout_height="wrap_content"
             tools:ignore="InconsistentLayout">
 
-            <CheckedTextView
+            <android.support.v7.widget.AppCompatCheckedTextView
                 android:id="@+id/toolbar_toggle"
                 android:text="@string/app_name"
                 tools:text="March 2016"

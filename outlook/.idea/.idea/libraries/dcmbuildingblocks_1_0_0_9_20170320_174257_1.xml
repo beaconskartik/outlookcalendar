@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="dcmbuildingblocks-1.0.0-9-20170320.174257-1">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/../../../Services/build/android/Services/build/intermediates/exploded-aar/com.adobe/dcmbuildingblocks/1.0.0-9-20170320.174257-1/jars/classes.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../../Services/build/android/Services/build/intermediates/exploded-aar/com.adobe/dcmbuildingblocks/1.0.0-9-20170320.174257-1/jars/libs/httpclient-4.0-beta2.jar!/" />
+      <root url="file://$PROJECT_DIR$/../../../Services/build/android/Services/build/intermediates/exploded-aar/com.adobe/dcmbuildingblocks/1.0.0-9-20170320.174257-1/res" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

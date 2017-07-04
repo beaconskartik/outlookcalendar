@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="Microsoft.Intune.MAM.SDK.Support.v7">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/../../../Thirdparty/Microsoft/IntuneSDKAndroid/libs/Microsoft.Intune.MAM.SDK.Support.v7.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

@@ -3,4 +3,8 @@
 
     <!-- Tool bar related dimens -->
     <dimen name="toolbar_checktext_padding">8dp</dimen>
+
+    <dimen name="elevation">4dp</dimen>
+    
+
 </resources>

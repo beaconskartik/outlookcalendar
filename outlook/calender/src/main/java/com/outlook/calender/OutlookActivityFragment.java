@@ -9,14 +9,16 @@ import android.view.ViewGroup;
 /**
  * A placeholder fragment containing a simple view.
  */
-public class OutlookActivityFragment extends Fragment {
-
-    public OutlookActivityFragment() {
+public class OutlookActivityFragment extends Fragment
+{
+    
+    public OutlookActivityFragment()
+    {
     }
-
+    
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
+    {
         return inflater.inflate(R.layout.fragment_outlook, container, false);
     }
 }

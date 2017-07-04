@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/AdobeReader.iml" filepath="$PROJECT_DIR$/AdobeReader.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../../../AdobeReader/build/android/AdobeReader/AdobeReader-AdobeReader.iml" filepath="$PROJECT_DIR$/../../../AdobeReader/build/android/AdobeReader/AdobeReader-AdobeReader.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../../../Thirdparty/AndroidDynamicGrid/AndroidDynamicGrid.iml" filepath="$PROJECT_DIR$/../../../Thirdparty/AndroidDynamicGrid/AndroidDynamicGrid.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../../../Thirdparty/AndroidInAppBilling/AndroidInAppBilling.iml" filepath="$PROJECT_DIR$/../../../Thirdparty/AndroidInAppBilling/AndroidInAppBilling.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../../../Thirdparty/AndroidPopOverView/AndroidPopOverView.iml" filepath="$PROJECT_DIR$/../../../Thirdparty/AndroidPopOverView/AndroidPopOverView.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../../../Thirdparty/AndroidVerticalViewPager/AndroidVerticalViewPager.iml" filepath="$PROJECT_DIR$/../../../Thirdparty/AndroidVerticalViewPager/AndroidVerticalViewPager.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../../../SharedAndroidComponents/Connectors/Connectors.iml" filepath="$PROJECT_DIR$/../../../SharedAndroidComponents/Connectors/Connectors.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../../../SharedAndroidComponents/EMMSupportLibrary/EMMSupportLibrary.iml" filepath="$PROJECT_DIR$/../../../SharedAndroidComponents/EMMSupportLibrary/EMMSupportLibrary.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../../../SharedAndroidComponents/ESignServices/ESignServices.iml" filepath="$PROJECT_DIR$/../../../SharedAndroidComponents/ESignServices/ESignServices.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../../../Thirdparty/Microsoft/IntuneSDKAndroid/IntuneSDKAndroid.iml" filepath="$PROJECT_DIR$/../../../Thirdparty/Microsoft/IntuneSDKAndroid/IntuneSDKAndroid.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../../../components/repos/PDFViewer/PDFViewer/build/android/PDFViewer/PDFViewer.iml" filepath="$PROJECT_DIR$/../../../components/repos/PDFViewer/PDFViewer/build/android/PDFViewer/PDFViewer.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../../../SharedAndroidComponents/RawAndroid/RawAndroid.iml" filepath="$PROJECT_DIR$/../../../SharedAndroidComponents/RawAndroid/RawAndroid.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../../../Services/build/android/Services/Services.iml" filepath="$PROJECT_DIR$/../../../Services/build/android/Services/Services.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../../../SharedAndroidComponents/Signature/Signature.iml" filepath="$PROJECT_DIR$/../../../SharedAndroidComponents/Signature/Signature.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../../../Thirdparty/volley/volley.iml" filepath="$PROJECT_DIR$/../../../Thirdparty/volley/volley.iml" />
+    </modules>
+  </component>
+</project>
