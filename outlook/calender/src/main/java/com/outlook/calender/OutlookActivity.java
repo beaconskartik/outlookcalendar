@@ -28,9 +28,6 @@ public class OutlookActivity extends AppCompatActivity
         setContentView(R.layout.activity_outlook);
         Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-    
-        getSupportActionBar().setDisplayOptions(
-                ActionBar.DISPLAY_SHOW_HOME | ActionBar.DISPLAY_HOME_AS_UP);
         
         FloatingActionButton fab = (FloatingActionButton)findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener()
@@ -41,51 +38,6 @@ public class OutlookActivity extends AppCompatActivity
                 Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG).setAction("Action", null).show();
             }
         });
-        
-        init();
-    }
-    
-    private void init()
-    {
-        mToolbarCheckedTextView = (AppCompatCheckedTextView)findViewById(R.id.toolbar_toggle);
-        mToolbarCheckedTextView.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View v)
-            {
-                mToolbarCheckedTextView.toggle();
-                toggleCalendarView();
-            }
-        });
-        
-        mCalendarView = (OutlookCalender)findViewById(R.id.calendar_view);
-        mCalendarView.setOnChangeListener(new OnChangeListener()
-        {
-            @Override
-            public void onSelectedMonthChange(@NonNull Calendar calendar)
-            {
-                updateTitle(calendar);
-            }
-        });
-    }
-    
-    private void updateTitle(Calendar calendar)
-    {
-        final int flags = DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_NO_MONTH_DAY | DateUtils.FORMAT_SHOW_YEAR;
-        final long millis = calendar.getTimeInMillis();
-        mToolbarCheckedTextView.setText(DateUtils.formatDateRange(OutlookActivity.this, millis, millis, flags));
-    }
-    
-    private void toggleCalendarView()
-    {
-        if (mToolbarCheckedTextView.isChecked())
-        {
-            mCalendarView.setVisibility(View.VISIBLE);
-        }
-        else
-        {
-            mCalendarView.setVisibility(View.GONE);
-        }
     }
     
     @Override
@@ -110,5 +62,4 @@ public class OutlookActivity extends AppCompatActivity
     }
     
     private AppCompatCheckedTextView mToolbarCheckedTextView;
-    private OutlookCalender mCalendarView;
 }
