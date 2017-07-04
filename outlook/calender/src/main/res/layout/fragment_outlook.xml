@@ -12,19 +12,18 @@
         android:id="@+id/calender_header_frame"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:elevation="@dimen/elevation"
-        tools:ignore="InconsistentLayout">
+        android:orientation="vertical">
 
         <android.support.v7.widget.AppCompatCheckedTextView
             android:id="@+id/calender_toggle"
             android:text="@string/app_name"
             tools:text="March 2016"
+            android:elevation="@dimen/elevation"
             android:textAppearance="@style/TextAppearance.AppCompat.Title"
             android:checkMark="@drawable/check_mark_selector"
             android:freezesText="true"
             android:padding="@dimen/toolbar_checktext_padding"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 
         <View

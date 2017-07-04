@@ -5,6 +5,9 @@
     <dimen name="toolbar_checktext_padding">8dp</dimen>
 
     <dimen name="elevation">4dp</dimen>
-    
+
+    <!--Decorator related dimesn -->
+    <dimen name="dot_size">4dp</dimen>
+    <dimen name="padding_circle">8dp</dimen>
 
 </resources>

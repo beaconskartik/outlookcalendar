@@ -9,7 +9,11 @@ import android.os.Bundle;
 import android.support.v7.widget.AppCompatCheckedTextView;
 import android.text.format.DateUtils;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.View.OnFocusChangeListener;
+import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.widget.CheckedTextView;
 
@@ -53,6 +57,16 @@ public class OutlookActivityFragment extends Fragment
                updateTitle(calendar);
             }
         });
+        
+        mToolbarCheckedTextView.setOnClickListener(new OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                mToolbarCheckedTextView.toggle();
+                toggleCalendarView();
+            }
+        });
     }
     
     private void updateTitle(Calendar calendar)
@@ -71,6 +85,7 @@ public class OutlookActivityFragment extends Fragment
         else
         {
             mCalendarView.setVisibility(View.GONE);
+            
         }
     }
     
