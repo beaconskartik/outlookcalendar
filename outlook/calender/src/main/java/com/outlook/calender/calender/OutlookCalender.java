@@ -3,6 +3,7 @@ package com.outlook.calender.calender;
 import java.util.Calendar;
 
 import android.content.Context;
+import android.database.DataSetObserver;
 import android.support.annotation.AttrRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -34,7 +35,7 @@ public class OutlookCalender extends ViewPager
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec)
     {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-       
+    
         View child = mAdapter.getMothView(getCurrentItem());
         if (child != null)
         {
@@ -57,6 +58,28 @@ public class OutlookCalender extends ViewPager
     {
         mAdapter = new OutlookCalenderAdapter();
         setAdapter(mAdapter);
+    
+        mAdapter.registerDataSetObserver(new DataSetObserver()
+        {
+            @Override
+            public void onChanged()
+            {
+                if (getCurrentItem() < 0)
+                {
+                    return;
+                }
+                // rebind neighbours due to shifting or date selection change
+                if (getCurrentItem() > 0)
+                {
+                    mAdapter.bind(getCurrentItem() - 1);
+                }
+                if (getCurrentItem() < mAdapter.getCount() - 1)
+                {
+                    mAdapter.bind(getCurrentItem() + 1);
+                }
+            }
+        });
+        
         addOnPageChangeListener(new OnPageChangeListener()
         {
             @Override
@@ -95,8 +118,7 @@ public class OutlookCalender extends ViewPager
                     }
                     else
                     {
-                        mAdapter.bind(position - 1);
-                        mAdapter.bind(position + 1);
+                        mAdapter.notifyDataSetChanged();
                     }
                 }
             }
@@ -107,10 +129,12 @@ public class OutlookCalender extends ViewPager
     public interface OnChangeListener
     {
         void onSelectedMonthChange(@NonNull Calendar calendar);
+    
+        void onSelectedDayChange(@NonNull Calendar calendar);
     }
     
     // member variables
-    private OnChangeListener mListener;
+    private OnChangeListener       mListener;
     private OutlookCalenderAdapter mAdapter;
 }
 

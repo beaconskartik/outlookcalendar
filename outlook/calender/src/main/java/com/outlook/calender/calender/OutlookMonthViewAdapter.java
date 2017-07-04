@@ -3,15 +3,20 @@ package com.outlook.calender.calender;
 import java.text.DateFormatSymbols;
 import java.util.Calendar;
 
+import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView.Adapter;
 import android.support.v7.widget.RecyclerView.ViewHolder;
+import android.text.SpannableString;
+import android.text.Spanned;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.outlook.calender.R;
 import com.outlook.calender.calender.OutlookMonthViewAdapter.CellViewHolder;
+import com.outlook.calender.decorator.OutlookCircleDecorator;
 
 /**
  * Created by ksachan on 7/4/17.
@@ -57,8 +62,24 @@ public class OutlookMonthViewAdapter extends Adapter<CellViewHolder>
 			}
 			else
 			{
-				String day = String.valueOf(position - mStartOffset + 1);
-				((ContentViewHolder)holder).textView.setText(day);
+				final int adapterPosition = holder.getAdapterPosition();
+				TextView textView = ((ContentViewHolder)holder).textView;
+				String day = String.valueOf(adapterPosition - mStartOffset + 1);
+				
+				SpannableString spannable = new SpannableString(day);
+				if (mSelectedPosition == adapterPosition)
+				{
+					spannable.setSpan(new OutlookCircleDecorator(textView.getContext()), 0, day.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+				}
+				textView.setText(spannable, TextView.BufferType.SPANNABLE);
+				textView.setOnClickListener(new OnClickListener()
+				{
+					@Override
+					public void onClick(View v)
+					{
+						setSelectedPosition(adapterPosition, true);
+					}
+				});
 			}
 		}
 	}
@@ -77,6 +98,29 @@ public class OutlookMonthViewAdapter extends Adapter<CellViewHolder>
 	public int getItemCount()
 	{
 		return mDays;
+	}
+	
+	void setSelectedDay(@Nullable Calendar selectedDay)
+	{
+		setSelectedPosition(selectedDay == null ? -1 : mStartOffset + selectedDay.get(Calendar.DAY_OF_MONTH) - 1, false);
+	}
+	
+	private void setSelectedPosition(int position, boolean notifyObservers)
+	{
+		int last = mSelectedPosition;
+		if (position == last)
+		{
+			return;
+		}
+		mSelectedPosition = position;
+		if (last >= 0)
+		{
+			notifyItemChanged(last);
+		}
+		if (position >= 0)
+		{
+			notifyItemChanged(position, notifyObservers ? new SelectionPayload(mSelectedPosition - mStartOffset + 1) : null);
+		}
 	}
 	
 	static abstract class CellViewHolder
@@ -115,6 +159,16 @@ public class OutlookMonthViewAdapter extends Adapter<CellViewHolder>
 		}
 	}
 	
+	static class SelectionPayload
+	{
+		final int dayOfMonth;
+		
+		public SelectionPayload(int dayOfMonth)
+		{
+			this.dayOfMonth = dayOfMonth;
+		}
+	}
+	
 	public interface OutlookOnDayCellClicked
 	{
 		void onClick(View view);
@@ -122,10 +176,11 @@ public class OutlookMonthViewAdapter extends Adapter<CellViewHolder>
 	
 	private static final int VIEW_TYPE_HEADER  = 0;
 	private static final int VIEW_TYPE_CONTENT = 1;
-	private static final int SPANS_COUNT = 7;
+	private static final int SPANS_COUNT       = 7;
 	private final String[] mWeekdays;
 	private final int      mStartOffset;
 	private final int      mDays;
+	private int mSelectedPosition = -1;
 	
 	private OutlookOnDayCellClicked mClickHandler;
 }

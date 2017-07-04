@@ -64,6 +64,9 @@ public class OutlookCalenderAdapter extends PagerAdapter
         Bundle bundle = new Bundle();
         bundle.putInt(STATE_MONTH, mCalendars.get(0).get(Calendar.MONTH));
         bundle.putInt(STATE_YEAR, mCalendars.get(0).get(Calendar.YEAR));
+        bundle.putInt(STATE_SELECTED_YEAR, mSelectedDay.get(Calendar.YEAR));
+        bundle.putInt(STATE_SELECTED_MONTH, mSelectedDay.get(Calendar.MONTH));
+        bundle.putInt(STATE_SELECTED_DAY, mSelectedDay.get(Calendar.DAY_OF_MONTH));
         return bundle;
     }
     
@@ -75,9 +78,9 @@ public class OutlookCalenderAdapter extends PagerAdapter
         {
             return;
         }
-        
-        int month = savedState.getInt(STATE_MONTH);
-        int year = savedState.getInt(STATE_YEAR);
+        int month = savedState.getInt(STATE_MONTH), year = savedState.getInt(STATE_YEAR), selectedYear = savedState.getInt(
+                STATE_SELECTED_YEAR), selectedMonth = savedState.getInt(STATE_SELECTED_MONTH), selectedDay = savedState.getInt(STATE_SELECTED_DAY);
+        mSelectedDay.set(selectedYear, selectedMonth, selectedDay);
         for (int i = 0; i < getCount(); i++)
         {
             Calendar calendar = Calendar.getInstance();
@@ -87,17 +90,16 @@ public class OutlookCalenderAdapter extends PagerAdapter
         }
     }
     
-    
     public OutlookMonthView getMothView(int position)
     {
-        return  mMonthViews.get(position);
+        return mMonthViews.get(position);
     }
     
     public Calendar getCalendar(int position)
     {
         return mCalendars.get(position);
     }
-   
+    
     public void shiftLeft()
     {
         for (int i = 0; i < getCount() - 2; i++)
@@ -106,13 +108,13 @@ public class OutlookCalenderAdapter extends PagerAdapter
             first.add(Calendar.MONTH, getCount());
             mCalendars.add(first);
         }
-       
+    
         for (int i = 0; i <= 2; i++)
         {
             bind(i);
         }
     }
-   
+    
     public void shiftRight()
     {
         for (int i = 0; i < getCount() - 2; i++)
@@ -137,10 +139,16 @@ public class OutlookCalenderAdapter extends PagerAdapter
     }
     
     // Member Variables
-    private static final String                 STATE_MONTH = "state:month";
-    private static final String                 STATE_YEAR  = "state:year";
-    static final         int                    ITEM_COUNT  = 5;
-    private final        List<OutlookMonthView> mMonthViews = new ArrayList<>(getCount());
-    private final        List<Calendar>         mCalendars  = new ArrayList<>(getCount());
+    
+    private static final String STATE_MONTH          = "state:month";
+    private static final String STATE_YEAR           = "state:year";
+    private static final String STATE_SELECTED_YEAR  = "state:selectedYear";
+    private static final String STATE_SELECTED_MONTH = "state:selectedMonth";
+    private static final String STATE_SELECTED_DAY   = "state:selectedDay";
+    
+    static final  int                    ITEM_COUNT   = 5;
+    private final List<OutlookMonthView> mMonthViews  = new ArrayList<>(getCount());
+    private final List<Calendar>         mCalendars   = new ArrayList<>(getCount());
+    private final Calendar               mSelectedDay = Calendar.getInstance();
 }
 

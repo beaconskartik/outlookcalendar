@@ -56,6 +56,12 @@ public class OutlookActivityFragment extends Fragment
             {
                updateTitle(calendar);
             }
+    
+            @Override
+            public void onSelectedDayChange(@NonNull Calendar calendar)
+            {
+        
+            }
         });
         
         mToolbarCheckedTextView.setOnClickListener(new OnClickListener()
