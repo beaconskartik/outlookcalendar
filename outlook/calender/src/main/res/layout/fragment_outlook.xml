@@ -9,7 +9,7 @@
     tools:showIn="@layout/activity_outlook">
 
     <LinearLayout
-        android:id="@+id/calender_header_frame"
+        android:id="@+id/calender_linear_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
@@ -40,7 +40,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
 
-        <android.support.v7.widget.RecyclerView
+        <com.outlook.calender.agenda.OutlookAgendaView
             android:id="@+id/recycler_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
