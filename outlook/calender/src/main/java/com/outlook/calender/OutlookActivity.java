@@ -1,22 +1,14 @@
 package com.outlook.calender;
 
-import java.util.Calendar;
-
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatCheckedTextView;
 import android.support.v7.widget.Toolbar;
-import android.text.format.DateUtils;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
-
-import com.outlook.calender.calender.OutlookCalender;
-import com.outlook.calender.calender.OutlookCalender.OnChangeListener;
 
 public class OutlookActivity extends AppCompatActivity
 {

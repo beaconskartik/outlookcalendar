@@ -32,7 +32,6 @@ public class OutlookMonthView extends RecyclerView
 	public OutlookMonthView(Context context, @Nullable AttributeSet attrs, int defStyle)
 	{
 		super(context, attrs, defStyle);
-		
 		initialSetup();
 	}
 	
@@ -43,16 +42,15 @@ public class OutlookMonthView extends RecyclerView
 		setCalendar(Calendar.getInstance());
 	}
 	
-	void setOnDateChangeListener(OnDateChangeListener listener)
+	public void setOnDateChangeListener(OnDateChangeListener listener)
 	{
-		mListener = listener;
+		mDateChangeListener = listener;
 	}
 	
 	void setCalendar(Calendar calendar)
 	{
 		mCalendar = calendar;
-		
-		mAdapter = new OutlookMonthViewAdapter(calendar, new OutlookOnDayCellClicked()
+		mAdapter = new OutlookMonthViewAdapter(getContext(), calendar, new OutlookOnDayCellClicked()
 		{
 			@Override
 			public void onClick(View view)
@@ -66,14 +64,17 @@ public class OutlookMonthView extends RecyclerView
 			@Override
 			public void onItemRangeChanged(int positionStart, int itemCount, Object payload)
 			{
-				if (mListener == null)
+				if (mDateChangeListener == null)
 				{
 					return;
 				}
 				if (payload != null && payload instanceof SelectionPayload)
 				{
-					mSelectedDay.set(mCalendar.get(Calendar.YEAR), mCalendar.get(Calendar.MONTH), ((SelectionPayload)payload).dayOfMonth);
-					mListener.onSelectedDayChange(mSelectedDay);
+					Calendar selectedDay = Calendar.getInstance();
+					selectedDay.set(mCalendar.get(Calendar.YEAR), mCalendar.get(Calendar.MONTH), ((SelectionPayload)payload).dayOfMonth);
+					
+					// triggering the call for selected day change
+					mDateChangeListener.onSelectedDayChange(selectedDay);
 				}
 			}
 		});
@@ -81,40 +82,16 @@ public class OutlookMonthView extends RecyclerView
 		setAdapter(mAdapter);
 	}
 	
-	private void setSelectedDay(@Nullable Calendar selectedDay)
-	{
-		if (mCalendar == null)
-		{
-			return;
-		}
-		if (selectedDay == null)
-		{
-			mAdapter.setSelectedDay(null);
-		}
-		else if (mCalendar.get(Calendar.YEAR) == selectedDay.get(Calendar.YEAR) && mCalendar.get(Calendar.MONTH) == selectedDay.get(Calendar.MONTH))
-		{
-			mAdapter.setSelectedDay(selectedDay);
-		}
-		else
-		{
-			mAdapter.setSelectedDay(null);
-		}
-	}
-	
-	private Calendar getCalendar()
-	{
-		return mCalendar;
-	}
-	
+	/**
+	 * Interface to let client know that the selected day has been changed.
+	 */
 	interface OnDateChangeListener
 	{
-		
 		void onSelectedDayChange(@NonNull Calendar calendar);
 	}
 	
-	private static int      SPAN_COUNT   = 7;
-	private final  Calendar mSelectedDay = Calendar.getInstance();
+	private static int SPAN_COUNT = 7; // 7 months so grid is of 7
 	private Calendar                mCalendar;
 	private OutlookMonthViewAdapter mAdapter;
-	private OnDateChangeListener    mListener;
+	private OnDateChangeListener    mDateChangeListener;
 }

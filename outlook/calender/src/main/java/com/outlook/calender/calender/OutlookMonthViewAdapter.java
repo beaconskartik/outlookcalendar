@@ -3,6 +3,7 @@ package com.outlook.calender.calender;
 import java.text.DateFormatSymbols;
 import java.util.Calendar;
 
+import android.content.Context;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView.Adapter;
 import android.support.v7.widget.RecyclerView.ViewHolder;
@@ -24,37 +25,50 @@ import com.outlook.calender.decorator.OutlookCircleDecorator;
 
 public class OutlookMonthViewAdapter extends Adapter<CellViewHolder>
 {
-	public OutlookMonthViewAdapter(Calendar cal, OutlookOnDayCellClicked handler)
+	public OutlookMonthViewAdapter(Context context, Calendar cal, OutlookOnDayCellClicked handler)
 	{
-		mWeekdays = DateFormatSymbols.getInstance().getShortWeekdays();
 		cal.set(Calendar.DAY_OF_MONTH, 1);
+		
+		mWeekdays = DateFormatSymbols.getInstance().getShortWeekdays();
 		mStartOffset = cal.get(Calendar.DAY_OF_WEEK) - cal.getFirstDayOfWeek() + SPANS_COUNT;
 		mDays = mStartOffset + cal.getActualMaximum(Calendar.DAY_OF_MONTH);
-		mClickHandler = handler;
+		
+		mDayCellClickHandler = handler;
+		
+		mLayoutInflater = LayoutInflater.from(context);
 	}
 	
 	@Override
 	public CellViewHolder onCreateViewHolder(ViewGroup parent, int viewType)
 	{
-		LayoutInflater inflater = LayoutInflater.from(parent.getContext());
+		CellViewHolder viewHolder = null;
 		switch (viewType)
 		{
 			case VIEW_TYPE_HEADER:
-				return new HeaderViewHolder(inflater.inflate(R.layout.month_header_view, parent, false));
+			{
+				viewHolder = new HeaderViewHolder(mLayoutInflater.inflate(R.layout.month_header_view, parent, false));
+				break;
+			}
 			case VIEW_TYPE_CONTENT:
 			default:
-				return new ContentViewHolder(inflater.inflate(R.layout.month_item_view, parent, false));
+			{
+				viewHolder = new ContentViewHolder(mLayoutInflater.inflate(R.layout.month_item_view, parent, false));
+				break;
+			}
 		}
+		return viewHolder;
 	}
 	
 	@Override
 	public void onBindViewHolder(CellViewHolder holder, int position)
 	{
-		if (holder instanceof HeaderViewHolder)
+		int viewType = getItemViewType(position);
+		
+		if (viewType == VIEW_TYPE_HEADER)
 		{
 			((HeaderViewHolder)holder).textView.setText(mWeekdays[position + Calendar.SUNDAY]);
 		}
-		else if (holder instanceof ContentViewHolder)
+		else if (viewType == VIEW_TYPE_CONTENT)
 		{
 			if (position < mStartOffset)
 			{
@@ -78,6 +92,11 @@ public class OutlookMonthViewAdapter extends Adapter<CellViewHolder>
 					public void onClick(View v)
 					{
 						setSelectedPosition(adapterPosition, true);
+						
+						if (mDayCellClickHandler != null)
+						{
+							mDayCellClickHandler.onClick(v);
+						}
 					}
 				});
 			}
@@ -123,8 +142,7 @@ public class OutlookMonthViewAdapter extends Adapter<CellViewHolder>
 		}
 	}
 	
-	static abstract class CellViewHolder
-			extends ViewHolder
+	protected static class CellViewHolder extends ViewHolder
 	{
 		
 		public CellViewHolder(View itemView)
@@ -133,8 +151,7 @@ public class OutlookMonthViewAdapter extends Adapter<CellViewHolder>
 		}
 	}
 	
-	static class HeaderViewHolder
-			extends CellViewHolder
+	protected static class HeaderViewHolder extends CellViewHolder
 	{
 		
 		final TextView textView;
@@ -146,8 +163,7 @@ public class OutlookMonthViewAdapter extends Adapter<CellViewHolder>
 		}
 	}
 	
-	static class ContentViewHolder
-			extends CellViewHolder
+	protected static class ContentViewHolder extends CellViewHolder
 	{
 		
 		final TextView textView;
@@ -159,7 +175,7 @@ public class OutlookMonthViewAdapter extends Adapter<CellViewHolder>
 		}
 	}
 	
-	static class SelectionPayload
+	public static class SelectionPayload
 	{
 		final int dayOfMonth;
 		
@@ -169,6 +185,9 @@ public class OutlookMonthViewAdapter extends Adapter<CellViewHolder>
 		}
 	}
 	
+	/**
+	 *  Interface to listen change in date
+	 */
 	public interface OutlookOnDayCellClicked
 	{
 		void onClick(View view);
@@ -177,10 +196,14 @@ public class OutlookMonthViewAdapter extends Adapter<CellViewHolder>
 	private static final int VIEW_TYPE_HEADER  = 0;
 	private static final int VIEW_TYPE_CONTENT = 1;
 	private static final int SPANS_COUNT       = 7;
+	
+	// Constructor Initialization
 	private final String[] mWeekdays;
 	private final int      mStartOffset;
 	private final int      mDays;
+	private LayoutInflater mLayoutInflater;
+	
 	private int mSelectedPosition = -1;
 	
-	private OutlookOnDayCellClicked mClickHandler;
+	private OutlookOnDayCellClicked mDayCellClickHandler;
 }

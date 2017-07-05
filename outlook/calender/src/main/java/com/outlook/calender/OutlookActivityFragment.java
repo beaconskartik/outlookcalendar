@@ -9,16 +9,14 @@ import android.os.Bundle;
 import android.support.v7.widget.AppCompatCheckedTextView;
 import android.text.format.DateUtils;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.View.OnFocusChangeListener;
-import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
-import android.widget.CheckedTextView;
 
-import com.outlook.calender.calender.OutlookCalender;
-import com.outlook.calender.calender.OutlookCalender.OnChangeListener;
+import com.outlook.calender.agenda.OutlookAgendaAdapter;
+import com.outlook.calender.agenda.OutlookAgendaView;
+import com.outlook.calender.calender.OutlookCalenderViewPager;
+import com.outlook.calender.calender.OutlookCalenderViewPager.OnChangeListener;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -41,7 +39,8 @@ public class OutlookActivityFragment extends Fragment
     {
         super.onViewCreated(view, savedInstanceState);
     
-        mCalendarView = (OutlookCalender) view.findViewById(R.id.calendar_view);
+        mCalendarView = (OutlookCalenderViewPager) view.findViewById(R.id.calendar_view);
+        mAgendaView = (OutlookAgendaView) view.findViewById(R.id.agenda_view);
         mToolbarCheckedTextView = (AppCompatCheckedTextView) view.findViewById(R.id.calender_toggle);
         
         init();
@@ -55,12 +54,6 @@ public class OutlookActivityFragment extends Fragment
             public void onSelectedMonthChange(@NonNull Calendar calendar)
             {
                updateTitle(calendar);
-            }
-    
-            @Override
-            public void onSelectedDayChange(@NonNull Calendar calendar)
-            {
-        
             }
         });
         
@@ -95,6 +88,8 @@ public class OutlookActivityFragment extends Fragment
         }
     }
     
-    private OutlookCalender          mCalendarView;
+    private OutlookCalenderViewPager mCalendarView;
+    private OutlookAgendaView        mAgendaView;
+    private OutlookAgendaAdapter     mAgendaAdapter;
     private AppCompatCheckedTextView mToolbarCheckedTextView;
 }

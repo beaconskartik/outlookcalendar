@@ -9,10 +9,11 @@
     tools:showIn="@layout/activity_outlook">
 
     <LinearLayout
-        android:id="@+id/calender_linear_layout"
+        android:orientation="vertical"
+        android:showDividers="middle"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:layout_height="match_parent"
+        android:animateLayoutChanges="true">
 
         <android.support.v7.widget.AppCompatCheckedTextView
             android:id="@+id/calender_toggle"
@@ -30,9 +31,9 @@
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
-            android:background="@android:color/black" />
+            android:background="@android:color/darker_gray" />
 
-        <com.outlook.calender.calender.OutlookCalender
+        <com.outlook.calender.calender.OutlookCalenderViewPager
             android:id="@+id/calendar_view"
             android:visibility="visible"
             tools:visibility="visible"
@@ -40,8 +41,13 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
 
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@android:color/darker_gray" />
+
         <com.outlook.calender.agenda.OutlookAgendaView
-            android:id="@+id/recycler_view"
+            android:id="@+id/agenda_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
