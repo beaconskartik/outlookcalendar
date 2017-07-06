@@ -67,7 +67,7 @@ public class OutlookActivityFragment extends Fragment
             }
         });
         
-        mOutlookAgendaCalenderManager = new OutlookAgendaCalenderManager(mToolbarCheckedTextView, mCalendarView, mAgendaView);
+        // mOutlookAgendaCalenderManager = new OutlookAgendaCalenderManager(mToolbarCheckedTextView, mCalendarView, mAgendaView);
     }
     
     private void updateTitle(Calendar calendar)

@@ -37,11 +37,11 @@ public class OutlookAgendaCalenderManager
 	private void sync(@NonNull Calendar calendar, View originator)
 	{
 		mSelectedDate = calendar;
-		if (originator.equals(mCalendarView))
+		if (!originator.equals(mCalendarView))
 		{
 			mCalendarView.setSelectedDay(calendar);
 		}
-		if (originator.equals(mAgendaView))
+		if (!originator.equals(mAgendaView))
 		{
 			mAgendaView.setSelectedDay(calendar);
 		}

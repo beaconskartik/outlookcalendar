@@ -5,6 +5,7 @@ import java.util.Calendar;
 
 import android.content.Context;
 import android.support.annotation.Nullable;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.Adapter;
 import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.text.SpannableString;
@@ -34,7 +35,6 @@ public class OutlookMonthViewAdapter extends Adapter<CellViewHolder>
 		mDays = mStartOffset + cal.getActualMaximum(Calendar.DAY_OF_MONTH);
 		
 		mDayCellClickHandler = handler;
-		
 		mLayoutInflater = LayoutInflater.from(context);
 	}
 	
@@ -131,11 +131,13 @@ public class OutlookMonthViewAdapter extends Adapter<CellViewHolder>
 		{
 			return;
 		}
+		
 		mSelectedPosition = position;
 		if (last >= 0)
 		{
 			notifyItemChanged(last);
 		}
+		
 		if (position >= 0)
 		{
 			notifyItemChanged(position, notifyObservers ? new SelectionPayload(mSelectedPosition - mStartOffset + 1) : null);
@@ -203,7 +205,7 @@ public class OutlookMonthViewAdapter extends Adapter<CellViewHolder>
 	private final int      mDays;
 	private LayoutInflater mLayoutInflater;
 	
-	private int mSelectedPosition = -1;
+	private int mSelectedPosition = RecyclerView.NO_POSITION;
 	
 	private OutlookOnDayCellClicked mDayCellClickHandler;
 }

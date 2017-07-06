@@ -47,7 +47,7 @@ public class OutlookMonthView extends RecyclerView
 		mDateChangeListener = listener;
 	}
 	
-	void setCalendar(Calendar calendar)
+	public void setCalendar(Calendar calendar)
 	{
 		mCalendar = calendar;
 		mAdapter = new OutlookMonthViewAdapter(getContext(), calendar, new OutlookOnDayCellClicked()

@@ -14,8 +14,7 @@ import com.outlook.calender.utils.OutlookCalenderUtils;
  * Created by ksachan on 7/4/17.
  */
 
-public class OutlookCalenderViewPager
-		extends ViewPager
+public class OutlookCalenderViewPager extends ViewPager
 {
     public OutlookCalenderViewPager(Context context)
     {
@@ -49,13 +48,12 @@ public class OutlookCalenderViewPager
     
     private void init()
     {
-        mAdapter = new OutlookCalenderAdapter(mDateChangeListener);
+        mAdapter = new OutlookCalenderViewPagerAdapter(mDateChangeListener);
         setAdapter(mAdapter);
     
         addOnPageChangeListener(new SimpleOnPageChangeListener()
         {
-            public boolean mDragging = false; // indicate if page change is from user
-        
+            public boolean mDragging = false;
             @Override
             public void onPageSelected(int position)
             {
@@ -64,6 +62,7 @@ public class OutlookCalenderViewPager
                     toFirstDay(position);
                     notifyDayChange(mAdapter.getCalendar(position));
                 }
+                
                 mDragging = false;
                 
                 if (getVisibility() != VISIBLE)
@@ -71,7 +70,7 @@ public class OutlookCalenderViewPager
                     onPageScrollStateChanged(SCROLL_STATE_IDLE);
                 }
             }
-        
+    
             @Override
             public void onPageScrollStateChanged(int state)
             {
@@ -103,12 +102,6 @@ public class OutlookCalenderViewPager
         }
     }
     
-    /**
-     * shift and recycle pages if we are currently at last or first,
-     * ensure that users can peek hidden pages on 2 sides
-     *
-     * @param position current item position
-     */
     private void syncPages(int position)
     {
         int first = 0, last = mAdapter.getCount() - 1;
@@ -124,7 +117,6 @@ public class OutlookCalenderViewPager
         }
         else
         {
-            // rebind neighbours due to shifting
             if (position > 0)
             {
                 mAdapter.bind(position - 1);
@@ -168,13 +160,10 @@ public class OutlookCalenderViewPager
         public void onSelectedDayChange(@NonNull Calendar calendar)
         {
             mAdapter.setSelectedDay(getCurrentItem(), calendar, false);
-            if (mListener != null)
-            {
-                mListener.onSelectedDayChange(calendar);
-            }
+            notifyDayChange(calendar);
         }
     };
-    private OnChangeListener       mListener;
-    private OutlookCalenderAdapter mAdapter;
+    private OnChangeListener                mListener;
+    private OutlookCalenderViewPagerAdapter mAdapter;
 }
 

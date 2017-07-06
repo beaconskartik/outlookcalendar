@@ -16,9 +16,9 @@ import java.util.List;
  * Created by ksachan on 7/4/17.
  */
 
-public class OutlookCalenderAdapter extends PagerAdapter
+public class OutlookCalenderViewPagerAdapter extends PagerAdapter
 {
-    public OutlookCalenderAdapter(OutlookMonthView.OnDateChangeListener dateChangeListener)
+    public OutlookCalenderViewPagerAdapter(OutlookMonthView.OnDateChangeListener dateChangeListener)
     {
         mDateChangeListener = dateChangeListener;
         int mid = ITEM_COUNT / 2;
@@ -46,6 +46,8 @@ public class OutlookCalenderAdapter extends PagerAdapter
     @Override
     public void destroyItem(ViewGroup container, int position, Object object)
     {
+        // Removing listener
+        ((OutlookMonthView)object).setOnDateChangeListener(null);
         container.removeView((View)object);
     }
     
@@ -108,6 +110,7 @@ public class OutlookCalenderAdapter extends PagerAdapter
         {
             mMonthViews.get(position).setCalendar(mCalendars.get(position));
         }
+        bindSelectedDay(position);
     }
     
     private void bindSelectedDay(int position)
