@@ -39,7 +39,11 @@ public class OutlookAgendaView extends RecyclerView
 	public void onScrolled(int dx, int dy)
 	{
 		loadMore();
-		notifyDateChange();
+		
+		if (dy != 0)
+		{
+			notifyDateChange();
+		}
 	}
 	
 	@Override
