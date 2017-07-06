@@ -51,7 +51,7 @@ public class OutlookActivityFragment extends Fragment
         mCalendarView.setOnChangeListener(new OnChangeListener()
         {
             @Override
-            public void onSelectedMonthChange(@NonNull Calendar calendar)
+            public void onSelectedDayChange(@NonNull Calendar calendar)
             {
                updateTitle(calendar);
             }
@@ -66,6 +66,8 @@ public class OutlookActivityFragment extends Fragment
                 toggleCalendarView();
             }
         });
+        
+        mOutlookAgendaCalenderManager = new OutlookAgendaCalenderManager(mToolbarCheckedTextView, mCalendarView, mAgendaView);
     }
     
     private void updateTitle(Calendar calendar)
@@ -88,6 +90,7 @@ public class OutlookActivityFragment extends Fragment
         }
     }
     
+    private OutlookAgendaCalenderManager mOutlookAgendaCalenderManager;
     private OutlookCalenderViewPager mCalendarView;
     private OutlookAgendaView        mAgendaView;
     private OutlookAgendaAdapter     mAgendaAdapter;

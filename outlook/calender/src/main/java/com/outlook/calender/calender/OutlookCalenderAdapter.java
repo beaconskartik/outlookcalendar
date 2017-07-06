@@ -2,6 +2,7 @@ package com.outlook.calender.calender;
 
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.view.View;
@@ -17,8 +18,9 @@ import java.util.List;
 
 public class OutlookCalenderAdapter extends PagerAdapter
 {
-    public OutlookCalenderAdapter()
+    public OutlookCalenderAdapter(OutlookMonthView.OnDateChangeListener dateChangeListener)
     {
+        mDateChangeListener = dateChangeListener;
         int mid = ITEM_COUNT / 2;
         for (int i = 0; i < getCount(); i++)
         {
@@ -34,6 +36,7 @@ public class OutlookCalenderAdapter extends PagerAdapter
     {
         OutlookMonthView view = new OutlookMonthView(container.getContext());
         view.setLayoutParams(new ViewPager.LayoutParams());
+        view.setOnDateChangeListener(mDateChangeListener);
         mMonthViews.set(position, view);
         container.addView(view);
         bind(position);
@@ -58,37 +61,6 @@ public class OutlookCalenderAdapter extends PagerAdapter
         return view.equals(object);
     }
     
-    @Override
-    public Parcelable saveState()
-    {
-        Bundle bundle = new Bundle();
-        bundle.putInt(STATE_MONTH, mCalendars.get(0).get(Calendar.MONTH));
-        bundle.putInt(STATE_YEAR, mCalendars.get(0).get(Calendar.YEAR));
-        bundle.putInt(STATE_SELECTED_YEAR, mSelectedDay.get(Calendar.YEAR));
-        bundle.putInt(STATE_SELECTED_MONTH, mSelectedDay.get(Calendar.MONTH));
-        bundle.putInt(STATE_SELECTED_DAY, mSelectedDay.get(Calendar.DAY_OF_MONTH));
-        return bundle;
-    }
-    
-    @Override
-    public void restoreState(Parcelable state, ClassLoader loader)
-    {
-        Bundle savedState = (Bundle)state;
-        if (savedState == null)
-        {
-            return;
-        }
-        int month = savedState.getInt(STATE_MONTH), year = savedState.getInt(STATE_YEAR), selectedYear = savedState.getInt(
-                STATE_SELECTED_YEAR), selectedMonth = savedState.getInt(STATE_SELECTED_MONTH), selectedDay = savedState.getInt(STATE_SELECTED_DAY);
-        mSelectedDay.set(selectedYear, selectedMonth, selectedDay);
-        for (int i = 0; i < getCount(); i++)
-        {
-            Calendar calendar = Calendar.getInstance();
-            calendar.set(year, month, 1);
-            calendar.add(Calendar.MONTH, i);
-            mCalendars.set(i, calendar);
-        }
-    }
     
     public OutlookMonthView getMothView(int position)
     {
@@ -138,17 +110,42 @@ public class OutlookCalenderAdapter extends PagerAdapter
         }
     }
     
-    // Member Variables
+    private void bindSelectedDay(int position)
+    {
+        if (mMonthViews.get(position) != null)
+        {
+            mMonthViews.get(position).setSelectedDay(mSelectedDay);
+        }
+    }
     
-    private static final String STATE_MONTH          = "state:month";
-    private static final String STATE_YEAR           = "state:year";
-    private static final String STATE_SELECTED_YEAR  = "state:selectedYear";
-    private static final String STATE_SELECTED_MONTH = "state:selectedMonth";
-    private static final String STATE_SELECTED_DAY   = "state:selectedDay";
+    public void setSelectedDay(int position, @NonNull Calendar selectedDay, boolean notifySelf)
+    {
+        mSelectedDay.set(selectedDay.get(Calendar.YEAR), selectedDay.get(Calendar.MONTH), selectedDay.get(Calendar.DAY_OF_MONTH));
+        if (notifySelf)
+        {
+            bindSelectedDay(position);
+        }
+        if (position > 0)
+        {
+            bindSelectedDay(position - 1);
+        }
+        if (position < getCount() - 1)
+        {
+            bindSelectedDay(position + 1);
+        }
+    }
+    
+    public Calendar getSelectedDay()
+    {
+        return mSelectedDay;
+    }
+    
+    // Member Variables
     
     static final  int                    ITEM_COUNT   = 5;
     private final List<OutlookMonthView> mMonthViews  = new ArrayList<>(getCount());
     private final List<Calendar>         mCalendars   = new ArrayList<>(getCount());
     private final Calendar               mSelectedDay = Calendar.getInstance();
+    private OutlookMonthView.OnDateChangeListener mDateChangeListener;
 }
 

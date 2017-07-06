@@ -82,6 +82,27 @@ public class OutlookMonthView extends RecyclerView
 		setAdapter(mAdapter);
 	}
 	
+	public void setSelectedDay(Calendar calendar)
+	{
+		if (mCalendar == null)
+		{
+			return;
+		}
+		if (calendar == null)
+		{
+			mAdapter.setSelectedDay(null);
+		}
+		else if (mCalendar.get(Calendar.YEAR) == calendar.get(Calendar.YEAR)
+				 && mCalendar.get(Calendar.MONTH) == calendar.get(Calendar.MONTH))
+		{
+			mAdapter.setSelectedDay(calendar);
+		}
+		else
+		{
+			mAdapter.setSelectedDay(null);
+		}
+	}
+	
 	/**
 	 * Interface to let client know that the selected day has been changed.
 	 */
@@ -90,7 +111,7 @@ public class OutlookMonthView extends RecyclerView
 		void onSelectedDayChange(@NonNull Calendar calendar);
 	}
 	
-	private static int SPAN_COUNT = 7; // 7 months so grid is of 7
+	private static int SPAN_COUNT = 7; // 7 days in a week so grid is of 7
 	private Calendar                mCalendar;
 	private OutlookMonthViewAdapter mAdapter;
 	private OnDateChangeListener    mDateChangeListener;

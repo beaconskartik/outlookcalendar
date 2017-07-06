@@ -58,7 +58,7 @@ public class OutlookAgendaAdapter extends Adapter<AgendaViewHolder>
 	@Override
 	public void onBindViewHolder(AgendaViewHolder agendaViewHolder, int position)
 	{
-		agendaViewHolder.textView.setText(getItem(position).mTitle);
+		agendaViewHolder.textView.setText(getItem(position).getTitle());
 		if (position == 0)
 		{
 			postPrepend(agendaViewHolder.textView.getContext());
@@ -88,16 +88,16 @@ public class OutlookAgendaAdapter extends Adapter<AgendaViewHolder>
 		}
 	}
 	
-	int getPosition(Context context, long timeMillis)
+	public int getPosition(Context context, long timeMillis)
 	{
 		int start, end;
-		if (timeMillis < getItem(0).mTimeMillis)
+		if (timeMillis < getItem(0).getTimeMillis())
 		{
 			prepend(context);
 			start = 0;
 			end = mPrevMonth.size();
 		}
-		else if (timeMillis > getItem(getItemCount() - 1).mTimeMillis)
+		else if (timeMillis > getItem(getItemCount() - 1).getTimeMillis())
 		{
 			append(context);
 			start = mPrevMonth.size() + mCurrMonth.size();
@@ -111,12 +111,12 @@ public class OutlookAgendaAdapter extends Adapter<AgendaViewHolder>
 		
 		for (int i = start; i < end; i++)
 		{
-			if (getItem(i).mTimeMillis == timeMillis)
+			if (getItem(i).getTimeMillis() == timeMillis)
 			{
 				return i;
 			}
 		}
-		return -1;
+		return RecyclerView.NO_POSITION;
 	}
 	
 	public OutlookAgendaItem getItem(int position)
@@ -217,7 +217,6 @@ public class OutlookAgendaAdapter extends Adapter<AgendaViewHolder>
 	static class ContentViewHolder
 			extends AgendaViewHolder
 	{
-		
 		public ContentViewHolder(View itemView)
 		{
 			super(itemView);

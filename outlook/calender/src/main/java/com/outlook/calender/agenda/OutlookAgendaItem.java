@@ -10,8 +10,8 @@ import android.os.Parcelable;
 public abstract class OutlookAgendaItem implements Parcelable
 {
 	
-	final String mTitle;
-	final long   mTimeMillis;
+	final private String mTitle;
+	final private long   mTimeMillis;
 	
 	public OutlookAgendaItem(String title, long timeMillis)
 	{
@@ -23,6 +23,16 @@ public abstract class OutlookAgendaItem implements Parcelable
 	{
 		mTitle = source.readString();
 		mTimeMillis = source.readLong();
+	}
+	
+	public String getTitle()
+	{
+		return mTitle;
+	}
+	
+	public long getTimeMillis()
+	{
+		return mTimeMillis;
 	}
 	
 	@Override

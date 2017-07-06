@@ -119,7 +119,7 @@ public class OutlookMonthViewAdapter extends Adapter<CellViewHolder>
 		return mDays;
 	}
 	
-	void setSelectedDay(@Nullable Calendar selectedDay)
+	public void setSelectedDay(@Nullable Calendar selectedDay)
 	{
 		setSelectedPosition(selectedDay == null ? -1 : mStartOffset + selectedDay.get(Calendar.DAY_OF_MONTH) - 1, false);
 	}
@@ -163,7 +163,7 @@ public class OutlookMonthViewAdapter extends Adapter<CellViewHolder>
 		}
 	}
 	
-	protected static class ContentViewHolder extends CellViewHolder
+	private static class ContentViewHolder extends CellViewHolder
 	{
 		
 		final TextView textView;
