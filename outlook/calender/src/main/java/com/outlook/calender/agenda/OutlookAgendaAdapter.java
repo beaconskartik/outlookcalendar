@@ -251,7 +251,7 @@ public abstract class OutlookAgendaAdapter extends Adapter<AgendaViewHolder>
 	void unlockBinding()
 	{
 		mLock = false;
-		notifyDataSetChanged();
+		notifyItemRangeChanged(0, getItemCount());
 	}
 	
 	private Pair<OutlookAgendaEventGroup, Integer> findGroup(long timeMillis)

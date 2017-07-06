@@ -15,41 +15,19 @@
         android:layout_height="match_parent"
         android:animateLayoutChanges="true">
 
-        <android.support.v7.widget.AppCompatCheckedTextView
-            android:id="@+id/calender_toggle"
-            android:text="@string/app_name"
-            tools:text="March 2016"
-            android:elevation="@dimen/elevation"
-            android:checked="true"
-            android:textAppearance="@style/TextAppearance.AppCompat.Title"
-            android:checkMark="@drawable/check_mark_selector"
-            android:freezesText="true"
-            android:padding="@dimen/toolbar_checktext_padding"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@android:color/darker_gray" />
+
+
 
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:background="@android:color/darker_gray" />
 
-        <com.outlook.calender.calender.OutlookCalenderViewPager
-            android:id="@+id/calendar_view"
-            android:visibility="visible"
-            tools:visibility="visible"
-            android:background="?android:attr/colorBackground"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
 
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@android:color/darker_gray" />
-
-        <com.outlook.calender.agenda.OutlookAgendaView
-            android:id="@+id/agenda_view"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
 
     </LinearLayout>
 

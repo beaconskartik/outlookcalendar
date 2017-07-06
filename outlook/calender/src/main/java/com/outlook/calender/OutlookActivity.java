@@ -1,5 +1,7 @@
 package com.outlook.calender;
 
+import java.util.Calendar;
+
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -12,14 +14,20 @@ import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatCheckedTextView;
 import android.support.v7.widget.Toolbar;
+import android.text.format.DateUtils;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View.OnClickListener;
 import android.widget.Toast;
+
+import com.outlook.calender.agenda.OutlookAgendaAdapter;
+import com.outlook.calender.agenda.OutlookAgendaCursorAdapter;
+import com.outlook.calender.agenda.OutlookAgendaView;
+import com.outlook.calender.calender.OutlookCalenderViewPager;
 
 public class OutlookActivity extends AppCompatActivity
 {
-    
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -37,6 +45,28 @@ public class OutlookActivity extends AppCompatActivity
                 Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG).setAction("Action", null).show();
             }
         });
+    
+        mCalendarView = (OutlookCalenderViewPager)findViewById(R.id.calendar_view);
+        mAgendaView = (OutlookAgendaView)findViewById(R.id.agenda_view);
+        mToolbarCheckedTextView = (AppCompatCheckedTextView)findViewById(R.id.calender_toggle);
+        
+        init();
+    }
+    
+    private void init()
+    {
+        // updating title
+        updateTitle(Calendar.getInstance());
+        
+        mToolbarCheckedTextView.setOnClickListener(new OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                mToolbarCheckedTextView.toggle();
+                toggleCalendarView();
+            }
+        });
     }
     
     @Override
@@ -52,14 +82,12 @@ public class OutlookActivity extends AppCompatActivity
     {
         super.onPostCreate(savedInstanceState);
     
+        mOutlookAgendaCalenderManager = new OutlookAgendaCalenderManager(mToolbarCheckedTextView,
+                mCalendarView, mAgendaView);
+        
         if (checkPermissions())
         {
-            Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.fragment);
-            
-            if (fragment instanceof OutlookActivityFragment)
-            {
-                ((OutlookActivityFragment)fragment).loadEvents();
-            }
+          loadEvents();
         }
         else
         {
@@ -94,11 +122,7 @@ public class OutlookActivity extends AppCompatActivity
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (checkPermissions())
         {
-            Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.fragment);
-            if (fragment instanceof OutlookActivityFragment)
-            {
-                ((OutlookActivityFragment)fragment).loadEvents();
-            }
+            loadEvents();
         }
         else
         {
@@ -119,5 +143,33 @@ public class OutlookActivity extends AppCompatActivity
         return super.onOptionsItemSelected(item);
     }
     
-    private AppCompatCheckedTextView mToolbarCheckedTextView;
+    public void  loadEvents()
+    {
+        mAgendaView.setAdapter(new OutlookAgendaCursorAdapter(this));
+    }
+    
+    private void updateTitle(Calendar calendar)
+    {
+        final int flags = DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_NO_MONTH_DAY | DateUtils.FORMAT_SHOW_YEAR;
+        final long millis = calendar.getTimeInMillis();
+        mToolbarCheckedTextView.setText(DateUtils.formatDateRange(this, millis, millis, flags));
+    }
+    
+    private void toggleCalendarView()
+    {
+        if (mToolbarCheckedTextView.isChecked())
+        {
+            mCalendarView.setVisibility(View.VISIBLE);
+        }
+        else
+        {
+            mCalendarView.setVisibility(View.GONE);
+        }
+    }
+    
+    private OutlookAgendaCalenderManager mOutlookAgendaCalenderManager;
+    private  OutlookCalenderViewPager     mCalendarView;
+    private  OutlookAgendaView            mAgendaView;
+    private  OutlookAgendaAdapter         mAgendaAdapter;
+    private  AppCompatCheckedTextView     mToolbarCheckedTextView;
 }
