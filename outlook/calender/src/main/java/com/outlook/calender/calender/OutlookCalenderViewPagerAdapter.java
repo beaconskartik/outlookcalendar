@@ -128,10 +128,12 @@ public class OutlookCalenderViewPagerAdapter extends PagerAdapter
         {
             bindSelectedDay(position);
         }
+        
         if (position > 0)
         {
             bindSelectedDay(position - 1);
         }
+        
         if (position < getCount() - 1)
         {
             bindSelectedDay(position + 1);
