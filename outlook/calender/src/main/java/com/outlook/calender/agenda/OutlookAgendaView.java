@@ -38,7 +38,20 @@ public class OutlookAgendaView extends RecyclerView
 	@Override
 	public void onScrolled(int dx, int dy)
 	{
+		loadMore();
 		notifyDateChange();
+	}
+	
+	@Override
+	public void onScrollStateChanged(int state) {
+		super.onScrollStateChanged(state);
+		if (state == SCROLL_STATE_IDLE && mPendingScrollPosition != NO_POSITION) {
+			if (mPendingScrollPosition == ((LinearLayoutManager)getLayoutManager())
+					.findFirstVisibleItemPosition()) {
+				mPendingScrollPosition = NO_POSITION; // clear pending
+				mAdapter.unlockBinding();
+			}
+		}
 	}
 	
 	public void setOnDateChangeListener(OnDateChangeListener listener)
@@ -48,10 +61,31 @@ public class OutlookAgendaView extends RecyclerView
 	
 	public void setSelectedDay(@NonNull Calendar calendar)
 	{
+		if (mAdapter == null) {
+			return;
+		}
+		
 		mPendingScrollPosition = mAdapter.getPosition(getContext(), calendar.getTimeInMillis());
 		if (mPendingScrollPosition >= 0)
 		{
+			mAdapter.lockBinding();
 			smoothScrollToPosition(mPendingScrollPosition);
+		}
+	}
+	
+	void loadMore() {
+		if (mAdapter == null) {
+			return;
+		}
+		if (((LinearLayoutManager)getLayoutManager()).findFirstVisibleItemPosition() == 0) {
+			// once prepended first visible position will no longer be 0
+			// which will negate the guard check
+			mAdapter.prepend(getContext());
+		} else if (((LinearLayoutManager)getLayoutManager()).findLastVisibleItemPosition()
+				   == mAdapter.getItemCount() - 1) {
+			// once appended last visible position will no longer be last adapter position
+			// which will negate the guard check
+			mAdapter.append(getContext());
 		}
 	}
 	
@@ -63,6 +97,10 @@ public class OutlookAgendaView extends RecyclerView
 		mAdapter = new OutlookAgendaAdapter(getContext());
 		setAdapter(mAdapter);
 		getLayoutManager().scrollToPosition(OutlookAgendaAdapter.MONTH_SIZE * 2);
+		
+		if (isInEditMode()) {
+			setAdapter(new OutlookAgendaAdapter(getContext()) {});
+		}
 	}
 	
 	private void notifyDateChange()
@@ -72,7 +110,7 @@ public class OutlookAgendaView extends RecyclerView
 		{
 			return;
 		}
-		long timeMillis = mAdapter.getItem(position).getTimeMillis();
+		long timeMillis = mAdapter.getAdapterItem(position).getTimeMillis();
 		if (mPrevTimeMillis != timeMillis)
 		{
 			mPrevTimeMillis = timeMillis;

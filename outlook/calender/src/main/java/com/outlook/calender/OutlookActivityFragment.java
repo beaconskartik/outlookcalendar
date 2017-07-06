@@ -14,6 +14,7 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 
 import com.outlook.calender.agenda.OutlookAgendaAdapter;
+import com.outlook.calender.agenda.OutlookAgendaCursorAdapter;
 import com.outlook.calender.agenda.OutlookAgendaView;
 import com.outlook.calender.calender.OutlookCalenderViewPager;
 import com.outlook.calender.calender.OutlookCalenderViewPager.OnChangeListener;
@@ -39,9 +40,9 @@ public class OutlookActivityFragment extends Fragment
     {
         super.onViewCreated(view, savedInstanceState);
     
-        mCalendarView = (OutlookCalenderViewPager) view.findViewById(R.id.calendar_view);
-        mAgendaView = (OutlookAgendaView) view.findViewById(R.id.agenda_view);
-        mToolbarCheckedTextView = (AppCompatCheckedTextView) view.findViewById(R.id.calender_toggle);
+        mCalendarView = (OutlookCalenderViewPager)view.findViewById(R.id.calendar_view);
+        mAgendaView = (OutlookAgendaView)view.findViewById(R.id.agenda_view);
+        mToolbarCheckedTextView = (AppCompatCheckedTextView)view.findViewById(R.id.calender_toggle);
         
         init();
     }
@@ -60,8 +61,13 @@ public class OutlookActivityFragment extends Fragment
                 toggleCalendarView();
             }
         });
-        
-       mOutlookAgendaCalenderManager = new OutlookAgendaCalenderManager(mToolbarCheckedTextView, mCalendarView, mAgendaView);
+    
+        mOutlookAgendaCalenderManager = new OutlookAgendaCalenderManager(mToolbarCheckedTextView, mCalendarView, mAgendaView);
+    }
+    
+    public void loadEvents()
+    {
+        mAgendaView.setAdapter(new OutlookAgendaCursorAdapter(getActivity()));
     }
     
     private void updateTitle(Calendar calendar)
@@ -80,13 +86,12 @@ public class OutlookActivityFragment extends Fragment
         else
         {
             mCalendarView.setVisibility(View.GONE);
-            
         }
     }
     
     private OutlookAgendaCalenderManager mOutlookAgendaCalenderManager;
-    private OutlookCalenderViewPager mCalendarView;
-    private OutlookAgendaView        mAgendaView;
-    private OutlookAgendaAdapter     mAgendaAdapter;
-    private AppCompatCheckedTextView mToolbarCheckedTextView;
+    private OutlookCalenderViewPager     mCalendarView;
+    private OutlookAgendaView            mAgendaView;
+    private OutlookAgendaAdapter         mAgendaAdapter;
+    private AppCompatCheckedTextView     mToolbarCheckedTextView;
 }

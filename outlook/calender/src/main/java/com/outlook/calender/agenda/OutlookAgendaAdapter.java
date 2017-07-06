@@ -5,7 +5,9 @@ import java.util.Calendar;
 import java.util.List;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.os.Handler;
+import android.support.v4.util.Pair;
 import android.support.v7.text.AllCapsTransformationMethod;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.Adapter;
@@ -29,10 +31,6 @@ public class OutlookAgendaAdapter extends Adapter<AgendaViewHolder>
 	{
 		mContext = context;
 		mInflater = LayoutInflater.from(context);
-		mBaseTimeMillis = OutlookCalenderUtils.stripTime(Calendar.getInstance()).getTimeInMillis();
-		generate(context, mPrevMonth, -MONTH_SIZE);
-		generate(context, mCurrMonth, 0);
-		generate(context, mNextMonth, MONTH_SIZE);
 	}
 	
 	@Override
@@ -49,7 +47,7 @@ public class OutlookAgendaAdapter extends Adapter<AgendaViewHolder>
 			case VIEW_TYPE_CONTENT:
 			default:
 			{
-				viewHolder =  new ContentViewHolder(mInflater.inflate(R.layout.agenda_item_view, viewGroup, false));
+				viewHolder = new ContentViewHolder(mInflater.inflate(R.layout.agenda_item_view, viewGroup, false));
 				break;
 			}
 		}
@@ -59,27 +57,35 @@ public class OutlookAgendaAdapter extends Adapter<AgendaViewHolder>
 	@Override
 	public void onBindViewHolder(AgendaViewHolder agendaViewHolder, int position)
 	{
-		agendaViewHolder.textView.setText(getItem(position).getTitle());
-		if (position == 0)
+		if (mLock)
 		{
-			postPrepend(agendaViewHolder.textView.getContext());
+			return;
 		}
-		else if (position == getItemCount() - 1)
+		if (agendaViewHolder instanceof HeaderViewHolder)
 		{
-			postAppend(agendaViewHolder.textView.getContext());
+			loadEvents(position);
+		}
+		OutlookAgendaItem item = getAdapterItem(position);
+		if (item instanceof OutlookAgendaNoEvent)
+		{
+			agendaViewHolder.textView.setText(R.string.no_event);
+		}
+		else
+		{
+			agendaViewHolder.textView.setText(item.mTitle);
 		}
 	}
 	
 	@Override
 	public int getItemCount()
 	{
-		return mPrevMonth.size() + mCurrMonth.size() + mNextMonth.size();
+		return mEventGroups.groupAndChildrenSize();
 	}
 	
 	@Override
 	public int getItemViewType(int position)
 	{
-		if (getItem(position) instanceof OutlookAgendaItemHeader)
+		if (getAdapterItem(position) instanceof OutlookAgendaEventGroup)
 		{
 			return VIEW_TYPE_HEADER;
 		}
@@ -89,107 +95,227 @@ public class OutlookAgendaAdapter extends Adapter<AgendaViewHolder>
 		}
 	}
 	
-	public int getPosition(Context context, long timeMillis)
+	protected void loadEvents(long timeMillis)
 	{
-		int start, end;
-		if (timeMillis < getItem(0).getTimeMillis())
-		{
-			prepend(context);
-			start = 0;
-			end = mPrevMonth.size();
-		}
-		else if (timeMillis > getItem(getItemCount() - 1).getTimeMillis())
-		{
-			append(context);
-			start = mPrevMonth.size() + mCurrMonth.size();
-			end = getItemCount();
-		}
-		else
-		{
-			start = 0;
-			end = getItemCount();
-		}
-		
-		for (int i = start; i < end; i++)
-		{
-			if (getItem(i).getTimeMillis() == timeMillis)
-			{
-				return i;
-			}
-		}
-		return RecyclerView.NO_POSITION;
+		// override to load events
 	}
 	
-	public OutlookAgendaItem getItem(int position)
+	/**
+	 * Binds events for given day, each event should either
+	 * start and end within the day,
+	 * or starts before and end within of after the day.
+	 * Bound cursor should be deactivated via {@link #deactivate()} when appropriate
+	 *
+	 * @param timeMillis time in millis that represents day in agenda
+	 * @param cursor     {@link android.provider.CalendarContract.Events} cursor
+	 * @see {@link #loadEvents(long)}
+	 * @see {@link #deactivate()}
+	 */
+	public final void bindEvents(long timeMillis, Cursor cursor)
 	{
-		if (position < mPrevMonth.size())
+		Pair<OutlookAgendaEventGroup, Integer> pair = findGroup(timeMillis);
+		if (pair != null)
 		{
-			return mPrevMonth.get(position);
+			pair.first.setCursor(cursor, mEventObserver);
+			notifyEventsChanged(pair.first, pair.second);
 		}
-		if (position < mPrevMonth.size() + mCurrMonth.size())
-		{
-			return mCurrMonth.get(position - mPrevMonth.size());
-		}
-		return mNextMonth.get(position - mCurrMonth.size() - mPrevMonth.size());
 	}
 	
-	private void postPrepend(final Context context)
+	/**
+	 * Closes bound cursors and unregisters their observers
+	 * that have been previously bound by {@link #bindEvents(long, Cursor)}
+	 *
+	 * @see {@link #bindEvents(long, Cursor)}
+	 */
+	public final void deactivate()
 	{
-		mHandler.post(new Runnable()
+		mEventGroups.clear();
+	}
+	
+	/**
+	 * Gets adapter position for given day, prepends or appends days
+	 * to the list if out of range
+	 *
+	 * @param context    resources provider
+	 * @param timeMillis time in milliseconds representing given day
+	 * @return adapter position or {@link RecyclerView#NO_POSITION} if not a valid day (no time)
+	 */
+	int getPosition(Context context, long timeMillis)
+	{
+		if (timeMillis < mEventGroups.get(0).mTimeMillis)
 		{
-			@Override
-			public void run()
+			while (timeMillis < mEventGroups.get(0).mTimeMillis)
 			{
 				prepend(context);
 			}
-		});
-	}
-	
-	private void prepend(Context context)
-	{
-		notifyItemRangeRemoved(mPrevMonth.size() + mCurrMonth.size(), mNextMonth.size());
-		ArrayList<OutlookAgendaItem> prepended = mNextMonth;
-		mNextMonth = mCurrMonth;
-		mCurrMonth = mPrevMonth;
-		mPrevMonth = prepended;
-		mBaseTimeMillis -= DateUtils.DAY_IN_MILLIS * MONTH_SIZE;
-		generate(context, prepended, -MONTH_SIZE);
-		notifyItemRangeInserted(0, prepended.size());
-	}
-	
-	private void postAppend(final Context context)
-	{
-		mHandler.post(new Runnable()
+		}
+		else if (timeMillis > mEventGroups.get(mEventGroups.size() - 1).mTimeMillis)
 		{
-			@Override
-			public void run()
+			while (timeMillis > mEventGroups.get(mEventGroups.size() - 1).mTimeMillis)
 			{
 				append(context);
 			}
-		});
-	}
-	
-	private void append(Context context)
-	{
-		notifyItemRangeRemoved(0, mPrevMonth.size());
-		ArrayList<OutlookAgendaItem> appended = mPrevMonth;
-		mPrevMonth = mCurrMonth;
-		mCurrMonth = mNextMonth;
-		mNextMonth = appended;
-		mBaseTimeMillis += DateUtils.DAY_IN_MILLIS * MONTH_SIZE;
-		generate(context, appended, MONTH_SIZE);
-		notifyItemRangeInserted(mPrevMonth.size() + mCurrMonth.size(), appended.size());
-	}
-	
-	private void generate(Context context, List<OutlookAgendaItem> list, int offset)
-	{
-		list.clear();
-		for (int i = offset; i < offset + MONTH_SIZE; i++)
-		{
-			long timeMillis = mBaseTimeMillis + DateUtils.DAY_IN_MILLIS * i;
-			list.add(new OutlookAgendaItemHeader(context, timeMillis));
-			list.add(new OutlookAgendaItemContent(context, timeMillis));
 		}
+		Pair<OutlookAgendaEventGroup, Integer> pair = findGroup(timeMillis);
+		if (pair == null)
+		{
+			return RecyclerView.NO_POSITION;
+		}
+		return pair.second;
+	}
+	
+	OutlookAgendaItem getAdapterItem(int position)
+	{
+		return mEventGroups.getGroupOrItem(position);
+	}
+	
+	/**
+	 * Adds days to beginning of this adapter data set
+	 * Added days should immediately precede current adapter days.
+	 * Last days in adapter may be pruned to keep its size constantly small.
+	 *
+	 * @param context resources provider
+	 * @see {@link #append(Context)}
+	 */
+	void prepend(Context context)
+	{
+		long daysMillis = mEventGroups.size() * DateUtils.DAY_IN_MILLIS;
+		int count = MONTH_SIZE, inserted = 0;
+		for (int i = 0; i < count; i++)
+		{
+			OutlookAgendaEventGroup last = mEventGroups.get(mEventGroups.size() - 1 - i);
+			OutlookAgendaEventGroup first = new OutlookAgendaEventGroup(context, last.mTimeMillis - daysMillis);
+			inserted += first.itemCount() + 1;
+			mEventGroups.add(0, first);
+		}
+		notifyItemRangeInserted(0, inserted);
+		prune(false);
+	}
+	
+	/**
+	 * Adds days to end of this adapter data set
+	 * Added days should immediately succeed current adapter days.
+	 * First days in adapter may be pruned to keep its size constantly small.
+	 *
+	 * @param context resources provider
+	 * @see {@link #prepend(Context)}
+	 */
+	void append(Context context)
+	{
+		int count = MONTH_SIZE;
+		if (mEventGroups.isEmpty())
+		{
+			long today = OutlookCalenderUtils.stripTime(Calendar.getInstance()).getTimeInMillis();
+			for (int i = 0; i < count; i++)
+			{
+				mEventGroups.add(new OutlookAgendaEventGroup(context, today + DateUtils.DAY_IN_MILLIS * i));
+			}
+		}
+		else
+		{
+			long daysMillis = mEventGroups.size() * DateUtils.DAY_IN_MILLIS;
+			int inserted = 0;
+			for (int i = 0; i < count; i++)
+			{
+				OutlookAgendaEventGroup first = mEventGroups.get(i);
+				OutlookAgendaEventGroup last = new OutlookAgendaEventGroup(context, first.mTimeMillis + daysMillis);
+				inserted += last.itemCount() + 1;
+				mEventGroups.add(last);
+			}
+			notifyItemRangeInserted(getItemCount() - inserted + 1, inserted);
+			prune(true);
+		}
+	}
+	
+	/**
+	 * Temporarily locks view holder binding until {@link #unlockBinding()} is called.
+	 * This can be used in case {@link RecyclerView} is being scrolled and binding
+	 * needs to be disabled temporarily to prevent scroll offset changes
+	 *
+	 * @see {@link #unlockBinding()}
+	 */
+	void lockBinding()
+	{
+		mLock = true;
+	}
+	
+	/**
+	 * Unlocks view holder binding that may have been previously locked by {@link #lockBinding()},
+	 * notifying adapter to rebind view holders as a result
+	 *
+	 * @see {@link #loadEvents(long)}
+	 */
+	void unlockBinding()
+	{
+		mLock = false;
+		notifyDataSetChanged();
+	}
+	
+	private Pair<OutlookAgendaEventGroup, Integer> findGroup(long timeMillis)
+	{
+		int position = 0;
+		// TODO improve searching
+		for (int i = 0; i < mEventGroups.size(); i++)
+		{
+			OutlookAgendaEventGroup group = mEventGroups.get(i);
+			if (group.mTimeMillis == timeMillis)
+			{
+				return Pair.create(group, position);
+			}
+			else
+			{
+				position += group.itemCount() + 1;
+			}
+		}
+		return null;
+	}
+	
+	private void notifyEventsChanged(OutlookAgendaEventGroup group, int position)
+	{
+		int lastCount = group.mLastCursorCount, newCount = group.mCursor.getCount(), refreshCount = Math.min(newCount,
+				lastCount), diff = newCount - lastCount;
+		// either last or current count is 0
+		// we need to swap no event placeholder
+		// and insert/remove the rest - 1 positions
+		if (refreshCount == 0)
+		{
+			refreshCount = 1;
+			diff = Math.max(--diff, 0);
+		}
+		notifyItemRangeChanged(position + 1, refreshCount);
+		if (diff > 0)
+		{
+			notifyItemRangeInserted(position + 1 + refreshCount, diff);
+		}
+		else if (diff < 0)
+		{
+			notifyItemRangeRemoved(position + 1 + refreshCount, -diff);
+		}
+		group.mLastCursorCount = newCount;
+	}
+	
+	private void loadEvents(int position)
+	{
+		OutlookAgendaEventGroup group = (OutlookAgendaEventGroup)getAdapterItem(position);
+		if (group.mCursor == null)
+		{
+			loadEvents(group.mTimeMillis);
+		}
+	}
+	
+	private void prune(boolean start)
+	{
+		if (mEventGroups.size() <= MAX_SIZE)
+		{
+			return;
+		}
+		int removed = 0, index = start ? 0 : MAX_SIZE;
+		while (mEventGroups.size() > MAX_SIZE)
+		{
+			removed += mEventGroups.get(index).itemCount() + 1;
+			mEventGroups.remove(index);
+		}
+		notifyItemRangeRemoved(start ? 0 : getItemCount(), removed);
 	}
 	
 	public static class AgendaViewHolder
@@ -224,17 +350,22 @@ public class OutlookAgendaAdapter extends Adapter<AgendaViewHolder>
 		}
 	}
 	
-	public static final int MONTH_SIZE        = 31;
+	public static final int MONTH_SIZE = 31;
 	
 	private Context mContext;
+	static final         int MAX_SIZE          = MONTH_SIZE * 2;
 	private static final int VIEW_TYPE_HEADER  = 0;
 	private static final int VIEW_TYPE_CONTENT = 1;
 	
-	private ArrayList<OutlookAgendaItem> mCurrMonth = new ArrayList<>(MONTH_SIZE * 2);
-	private ArrayList<OutlookAgendaItem> mPrevMonth = new ArrayList<>(MONTH_SIZE * 2);
-	private ArrayList<OutlookAgendaItem> mNextMonth = new ArrayList<>(MONTH_SIZE * 2);
-	
-	private       long           mBaseTimeMillis; // start day of rmiddle block
+	private final OutlookAgendaEventGroup.EventObserver mEventObserver = new OutlookAgendaEventGroup.EventObserver()
+	{
+		@Override
+		public void onChange(long timeMillis)
+		{
+			loadEvents(timeMillis);
+		}
+	};
+	private final OutlookAgendaEventList                mEventGroups   = new OutlookAgendaEventList(MONTH_SIZE);
 	private final LayoutInflater mInflater;
-	private final Handler mHandler = new Handler();
+	private       boolean        mLock;
 }
