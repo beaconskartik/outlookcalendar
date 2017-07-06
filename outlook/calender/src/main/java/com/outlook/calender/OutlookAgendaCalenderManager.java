@@ -4,6 +4,7 @@ import java.util.Calendar;
 
 import android.support.annotation.NonNull;
 import android.support.v7.widget.AppCompatCheckedTextView;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
@@ -20,11 +21,24 @@ public class OutlookAgendaCalenderManager
 	public OutlookAgendaCalenderManager(AppCompatCheckedTextView toolbarCheckedTextView, OutlookCalenderViewPager calendarView,
 										OutlookAgendaView agendaView)
 	{
+		if (mCalendarView != null)
+		{
+			mCalendarView.setOnChangeListener(null);
+		}
+		
+		if (mAgendaView != null)
+		{
+			mAgendaView.setOnDateChangeListener(null);
+		}
+		
 		mTextView = toolbarCheckedTextView;
 		mCalendarView = calendarView;
 		mAgendaView = agendaView;
-		mSelectedDate = Calendar.getInstance();
 		
+		if (mSelectedDate == null)
+		{
+			mSelectedDate = Calendar.getInstance();
+		}
 		
 		calendarView.setSelectedDay(mSelectedDate);
 		agendaView.setSelectedDay(mSelectedDate);
@@ -41,6 +55,7 @@ public class OutlookAgendaCalenderManager
 		{
 			mCalendarView.setSelectedDay(calendar);
 		}
+		
 		if (!originator.equals(mAgendaView))
 		{
 			mAgendaView.setSelectedDay(calendar);
@@ -58,6 +73,7 @@ public class OutlookAgendaCalenderManager
 		@Override
 		public void onSelectedDayChange(@NonNull Calendar calendar)
 		{
+			Log.d("kartik", "Month : " + OutlookCalenderUtils.toMonthString(mTextView.getContext(), calendar.getTimeInMillis()));
 			sync(calendar, mCalendarView);
 		}
 	};
@@ -67,6 +83,8 @@ public class OutlookAgendaCalenderManager
 		@Override
 		public void onSelectedDayChange(@NonNull Calendar calendar)
 		{
+			Log.d("kartik", "Month : " + OutlookCalenderUtils.toMonthString(mTextView.getContext(), calendar.getTimeInMillis())
+			+ " Day : " + calendar.get(Calendar.DAY_OF_MONTH));
 			sync(calendar, mAgendaView);
 		}
 	};

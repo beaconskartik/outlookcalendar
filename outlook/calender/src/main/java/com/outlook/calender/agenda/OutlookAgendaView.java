@@ -3,9 +3,11 @@ package com.outlook.calender.agenda;
 import java.util.Calendar;
 
 import android.content.Context;
+import android.graphics.PointF;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.LinearSmoothScroller;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 
@@ -56,11 +58,11 @@ public class OutlookAgendaView extends RecyclerView
 	private void init()
 	{
 		setHasFixedSize(true);
-		setLayoutManager(new LinearLayoutManager(getContext()));
+		setLayoutManager(new AgendaLinearLayoutManager(getContext()));
 		addItemDecoration(new OutlookDividerDectorator(getContext()));
 		mAdapter = new OutlookAgendaAdapter(getContext());
 		setAdapter(mAdapter);
-		getLayoutManager().scrollToPosition(OutlookAgendaAdapter.MONTH_SIZE * 2); // start of current month
+		getLayoutManager().scrollToPosition(OutlookAgendaAdapter.MONTH_SIZE * 2);
 	}
 	
 	private void notifyDateChange()
@@ -81,9 +83,35 @@ public class OutlookAgendaView extends RecyclerView
 				mListener.onSelectedDayChange(mSelectedDate);
 			}
 		}
-		if (mPendingScrollPosition == position)
+	}
+	
+	static class AgendaLinearLayoutManager extends LinearLayoutManager
+	{
+		
+		public AgendaLinearLayoutManager(Context context)
 		{
-			mPendingScrollPosition = NO_POSITION; // clear pending
+			super(context);
+		}
+		
+		@Override
+		public void smoothScrollToPosition(RecyclerView recyclerView, RecyclerView.State state, int position)
+		{
+			RecyclerView.SmoothScroller smoothScroller = new LinearSmoothScroller(recyclerView.getContext())
+			{
+				@Override
+				public PointF computeScrollVectorForPosition(int targetPosition)
+				{
+					return AgendaLinearLayoutManager.this.computeScrollVectorForPosition(targetPosition);
+				}
+				
+				@Override
+				protected int getVerticalSnapPreference()
+				{
+					return SNAP_TO_START; // override base class behavior
+				}
+			};
+			smoothScroller.setTargetPosition(position);
+			startSmoothScroll(smoothScroller);
 		}
 	}
 	

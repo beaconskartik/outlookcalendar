@@ -11,6 +11,16 @@ import android.text.format.DateUtils;
 
 public class OutlookCalenderUtils
 {
+    
+    public static Calendar stripTime(Calendar calendar) {
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        return calendar;
+    }
+    
+    
     public static String toDayString(Context context, long timeMillis)
     {
         return DateUtils.formatDateTime(context, timeMillis, DateUtils.FORMAT_SHOW_WEEKDAY | DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_NO_YEAR);

@@ -17,6 +17,7 @@ import android.widget.TextView;
 
 import com.outlook.calender.R;
 import com.outlook.calender.agenda.OutlookAgendaAdapter.AgendaViewHolder;
+import com.outlook.calender.utils.OutlookCalenderUtils;
 
 /**
  * Created by ksachan on 7/4/17.
@@ -28,8 +29,7 @@ public class OutlookAgendaAdapter extends Adapter<AgendaViewHolder>
 	{
 		mContext = context;
 		mInflater = LayoutInflater.from(context);
-		mBaseTimeMillis = Calendar.getInstance().getTimeInMillis();
-		
+		mBaseTimeMillis = OutlookCalenderUtils.stripTime(Calendar.getInstance()).getTimeInMillis();
 		generate(context, mPrevMonth, -MONTH_SIZE);
 		generate(context, mCurrMonth, 0);
 		generate(context, mNextMonth, MONTH_SIZE);
@@ -50,6 +50,7 @@ public class OutlookAgendaAdapter extends Adapter<AgendaViewHolder>
 			default:
 			{
 				viewHolder =  new ContentViewHolder(mInflater.inflate(R.layout.agenda_item_view, viewGroup, false));
+				break;
 			}
 		}
 		return viewHolder;
