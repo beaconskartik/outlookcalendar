@@ -25,7 +25,7 @@ import com.outlook.calender.utils.OutlookCalenderUtils;
  * Created by ksachan on 7/4/17.
  */
 
-public class OutlookAgendaAdapter extends Adapter<AgendaViewHolder>
+public abstract class OutlookAgendaAdapter extends Adapter<AgendaViewHolder>
 {
 	public OutlookAgendaAdapter(Context context)
 	{
@@ -142,18 +142,21 @@ public class OutlookAgendaAdapter extends Adapter<AgendaViewHolder>
 	 */
 	int getPosition(Context context, long timeMillis)
 	{
-		if (timeMillis < mEventGroups.get(0).mTimeMillis)
+		if (!mEventGroups.isEmpty())
 		{
-			while (timeMillis < mEventGroups.get(0).mTimeMillis)
+			if (timeMillis < mEventGroups.get(0).mTimeMillis)
 			{
-				prepend(context);
+				while (timeMillis < mEventGroups.get(0).mTimeMillis)
+				{
+					prepend(context);
+				}
 			}
-		}
-		else if (timeMillis > mEventGroups.get(mEventGroups.size() - 1).mTimeMillis)
-		{
-			while (timeMillis > mEventGroups.get(mEventGroups.size() - 1).mTimeMillis)
+			else if (timeMillis > mEventGroups.get(mEventGroups.size() - 1).mTimeMillis)
 			{
-				append(context);
+				while (timeMillis > mEventGroups.get(mEventGroups.size() - 1).mTimeMillis)
+				{
+					append(context);
+				}
 			}
 		}
 		Pair<OutlookAgendaEventGroup, Integer> pair = findGroup(timeMillis);

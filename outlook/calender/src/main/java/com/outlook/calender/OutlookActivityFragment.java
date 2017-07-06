@@ -65,7 +65,7 @@ public class OutlookActivityFragment extends Fragment
         mOutlookAgendaCalenderManager = new OutlookAgendaCalenderManager(mToolbarCheckedTextView, mCalendarView, mAgendaView);
     }
     
-    public void loadEvents()
+    public void  loadEvents()
     {
         mAgendaView.setAdapter(new OutlookAgendaCursorAdapter(getActivity()));
     }

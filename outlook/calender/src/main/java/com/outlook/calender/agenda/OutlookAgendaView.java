@@ -43,11 +43,13 @@ public class OutlookAgendaView extends RecyclerView
 	}
 	
 	@Override
-	public void onScrollStateChanged(int state) {
+	public void onScrollStateChanged(int state)
+	{
 		super.onScrollStateChanged(state);
-		if (state == SCROLL_STATE_IDLE && mPendingScrollPosition != NO_POSITION) {
-			if (mPendingScrollPosition == ((LinearLayoutManager)getLayoutManager())
-					.findFirstVisibleItemPosition()) {
+		if (state == SCROLL_STATE_IDLE && mPendingScrollPosition != NO_POSITION)
+		{
+			if (mPendingScrollPosition == ((LinearLayoutManager)getLayoutManager()).findFirstVisibleItemPosition())
+			{
 				mPendingScrollPosition = NO_POSITION; // clear pending
 				mAdapter.unlockBinding();
 			}
@@ -61,7 +63,8 @@ public class OutlookAgendaView extends RecyclerView
 	
 	public void setSelectedDay(@NonNull Calendar calendar)
 	{
-		if (mAdapter == null) {
+		if (mAdapter == null)
+		{
 			return;
 		}
 		
@@ -73,20 +76,39 @@ public class OutlookAgendaView extends RecyclerView
 		}
 	}
 	
-	void loadMore() {
-		if (mAdapter == null) {
+	void loadMore()
+	{
+		if (mAdapter == null)
+		{
 			return;
 		}
-		if (((LinearLayoutManager)getLayoutManager()).findFirstVisibleItemPosition() == 0) {
+		if (((LinearLayoutManager)getLayoutManager()).findFirstVisibleItemPosition() == 0)
+		{
 			// once prepended first visible position will no longer be 0
 			// which will negate the guard check
 			mAdapter.prepend(getContext());
-		} else if (((LinearLayoutManager)getLayoutManager()).findLastVisibleItemPosition()
-				   == mAdapter.getItemCount() - 1) {
+		}
+		else if (((LinearLayoutManager)getLayoutManager()).findLastVisibleItemPosition() == mAdapter.getItemCount() - 1)
+		{
 			// once appended last visible position will no longer be last adapter position
 			// which will negate the guard check
 			mAdapter.append(getContext());
 		}
+	}
+	
+	@Override
+	public void setAdapter(Adapter adapter)
+	{
+		if (adapter != null && !(adapter instanceof OutlookAgendaAdapter))
+		{
+			throw new IllegalArgumentException("Adapter must be an instance of AgendaAdapter");
+		}
+		mAdapter = (OutlookAgendaAdapter)adapter;
+		if (mAdapter != null)
+		{
+			mAdapter.append(getContext());
+		}
+		super.setAdapter(mAdapter);
 	}
 	
 	private void init()
@@ -94,12 +116,13 @@ public class OutlookAgendaView extends RecyclerView
 		setHasFixedSize(true);
 		setLayoutManager(new AgendaLinearLayoutManager(getContext()));
 		addItemDecoration(new OutlookDividerDectorator(getContext()));
-		mAdapter = new OutlookAgendaAdapter(getContext());
-		setAdapter(mAdapter);
 		getLayoutManager().scrollToPosition(OutlookAgendaAdapter.MONTH_SIZE * 2);
 		
-		if (isInEditMode()) {
-			setAdapter(new OutlookAgendaAdapter(getContext()) {});
+		if (isInEditMode())
+		{
+			setAdapter(new OutlookAgendaAdapter(getContext())
+			{
+			});
 		}
 	}
 	
@@ -123,7 +146,8 @@ public class OutlookAgendaView extends RecyclerView
 		}
 	}
 	
-	static class AgendaLinearLayoutManager extends LinearLayoutManager
+	static class AgendaLinearLayoutManager
+			extends LinearLayoutManager
 	{
 		
 		public AgendaLinearLayoutManager(Context context)

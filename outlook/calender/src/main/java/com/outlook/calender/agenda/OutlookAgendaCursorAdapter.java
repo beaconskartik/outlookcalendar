@@ -38,8 +38,10 @@ public class OutlookAgendaCursorAdapter extends OutlookAgendaAdapter
 				+ CalendarContract.Events.DTSTART + "<? AND "
 				+ CalendarContract.Events.DTEND + ">=?) AND "
 				+ CalendarContract.Events.DELETED + "=?",
-				new String[]{String.valueOf(timeMillis), String.valueOf(timeMillis + DateUtils.DAY_IN_MILLIS), String.valueOf(
-						timeMillis), String.valueOf(timeMillis + DateUtils.DAY_IN_MILLIS), "0"}, CalendarContract.Events.DTSTART + " ASC");
+				new String[]{String.valueOf(timeMillis), String.valueOf(timeMillis + DateUtils.DAY_IN_MILLIS)
+						 , String.valueOf(
+						timeMillis), String.valueOf(timeMillis + DateUtils.DAY_IN_MILLIS), "0"},
+				CalendarContract.Events.DTSTART + " ASC");
 	}
 	
 	private static final String[] EVENTS_PROJECTION = new String[]{

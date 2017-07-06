@@ -37,7 +37,7 @@ public class OutlookAgendaCalenderManager
 		
 		if (mSelectedDate == null)
 		{
-			mSelectedDate = Calendar.getInstance();
+			mSelectedDate = OutlookCalenderUtils.stripTime(Calendar.getInstance());
 		}
 		
 		calendarView.setSelectedDay(mSelectedDate);
