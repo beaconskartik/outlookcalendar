@@ -26,7 +26,7 @@ public class OutlookAgendaNoEvent extends OutlookAgendaEventItem
 	
 	OutlookAgendaNoEvent(String title, long timeMillis, long startTimeMillis)
 	{
-		super(title, timeMillis, startTimeMillis);
+		super(title, timeMillis, startTimeMillis, true);
 	}
 	
 	public OutlookAgendaNoEvent(Parcel source)

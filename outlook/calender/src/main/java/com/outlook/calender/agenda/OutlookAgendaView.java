@@ -12,6 +12,7 @@ import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 
 import com.outlook.calender.decorator.OutlookDividerDectorator;
+import com.outlook.calender.utils.OutlookCalenderUtils;
 
 /**
  * Created by ksachan on 7/4/17.
@@ -65,14 +66,14 @@ public class OutlookAgendaView extends RecyclerView
 		mListener = listener;
 	}
 	
-	public void setSelectedDay(@NonNull Calendar calendar)
+	public void setSelectedDay(@NonNull long dayMillis)
 	{
 		if (mAdapter == null)
 		{
 			return;
 		}
 		
-		mPendingScrollPosition = mAdapter.getPosition(getContext(), calendar.getTimeInMillis());
+		mPendingScrollPosition = mAdapter.getPosition(getContext(), dayMillis);
 		if (mPendingScrollPosition >= 0)
 		{
 			mAdapter.lockBinding();
@@ -141,11 +142,10 @@ public class OutlookAgendaView extends RecyclerView
 		if (mPrevTimeMillis != timeMillis)
 		{
 			mPrevTimeMillis = timeMillis;
-			mSelectedDate.setTimeInMillis(timeMillis);
 			// only notify listener if scroll is not triggered programmatically (i.e. no pending)
 			if (mPendingScrollPosition == NO_POSITION && mListener != null)
 			{
-				mListener.onSelectedDayChange(mSelectedDate);
+				mListener.onSelectedDayChange(timeMillis);
 			}
 		}
 	}
@@ -183,12 +183,11 @@ public class OutlookAgendaView extends RecyclerView
 	
 	public interface OnDateChangeListener
 	{
-		void onSelectedDayChange(@NonNull Calendar calendar);
+		void onSelectedDayChange(long dayMillis);
 	}
 	
 	private OnDateChangeListener mListener;
 	private OutlookAgendaAdapter mAdapter;
-	private final Calendar mSelectedDate          = Calendar.getInstance();
 	private       int      mPendingScrollPosition = NO_POSITION; // represent top scroll position to be set programmatically
-	private       long     mPrevTimeMillis        = -1;
+	private       long     mPrevTimeMillis        = OutlookCalenderUtils.NO_TIME_MILLIS;
 }

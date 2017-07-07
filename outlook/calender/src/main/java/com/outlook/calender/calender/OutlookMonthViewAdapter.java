@@ -2,14 +2,21 @@ package com.outlook.calender.calender;
 
 import java.text.DateFormatSymbols;
 import java.util.Calendar;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 
 import android.content.Context;
+import android.database.Cursor;
+import android.provider.CalendarContract;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.Adapter;
 import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.text.SpannableString;
 import android.text.Spanned;
+import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -19,6 +26,8 @@ import android.widget.TextView;
 import com.outlook.calender.R;
 import com.outlook.calender.calender.OutlookMonthViewAdapter.CellViewHolder;
 import com.outlook.calender.decorator.OutlookCircleDecorator;
+import com.outlook.calender.decorator.OutlookDotDecorator;
+import com.outlook.calender.utils.OutlookCalenderUtils;
 
 /**
  * Created by ksachan on 7/4/17.
@@ -26,14 +35,12 @@ import com.outlook.calender.decorator.OutlookCircleDecorator;
 
 public class OutlookMonthViewAdapter extends Adapter<CellViewHolder>
 {
-	public OutlookMonthViewAdapter(Context context, Calendar cal, OutlookOnDayCellClicked handler)
+	public OutlookMonthViewAdapter(Context context, long monthMillis, OutlookOnDayCellClicked handler)
 	{
-		cal.set(Calendar.DAY_OF_MONTH, 1);
-		
 		mWeekdays = DateFormatSymbols.getInstance().getShortWeekdays();
-		mStartOffset = cal.get(Calendar.DAY_OF_WEEK) - cal.getFirstDayOfWeek() + SPANS_COUNT;
-		mDays = mStartOffset + cal.getActualMaximum(Calendar.DAY_OF_MONTH);
-		
+		mBaseTimeMillis = OutlookCalenderUtils.monthFirstDay(monthMillis);
+		mStartOffset = OutlookCalenderUtils.monthFirstDayOffset(mBaseTimeMillis) + SPANS_COUNT;
+		mDays = mStartOffset + OutlookCalenderUtils.monthSize(monthMillis);
 		mDayCellClickHandler = handler;
 		mLayoutInflater = LayoutInflater.from(context);
 	}
@@ -78,12 +85,18 @@ public class OutlookMonthViewAdapter extends Adapter<CellViewHolder>
 			{
 				final int adapterPosition = holder.getAdapterPosition();
 				TextView textView = ((ContentViewHolder)holder).textView;
-				String day = String.valueOf(adapterPosition - mStartOffset + 1);
+				int dayIndex = adapterPosition - mStartOffset;
 				
-				SpannableString spannable = new SpannableString(day);
+				String dayString = String.valueOf(dayIndex + 1);
+				
+				SpannableString spannable = new SpannableString(dayString);
 				if (mSelectedPosition == adapterPosition)
 				{
-					spannable.setSpan(new OutlookCircleDecorator(textView.getContext()), 0, day.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+					spannable.setSpan(new OutlookCircleDecorator(textView.getContext()), 0, dayString.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+				}
+				else if (mEvents.contains(dayIndex))
+				{
+					spannable.setSpan(new OutlookDotDecorator(textView.getContext()), 0, dayString.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
 				}
 				textView.setText(spannable, TextView.BufferType.SPANNABLE);
 				textView.setOnClickListener(new OnClickListener()
@@ -119,9 +132,9 @@ public class OutlookMonthViewAdapter extends Adapter<CellViewHolder>
 		return mDays;
 	}
 	
-	public void setSelectedDay(@Nullable Calendar selectedDay)
+	public void setSelectedDay(long dayMillis)
 	{
-		setSelectedPosition(selectedDay == null ? -1 : mStartOffset + selectedDay.get(Calendar.DAY_OF_MONTH) - 1, false);
+		setSelectedPosition(OutlookCalenderUtils.isNotTime(dayMillis) ? -1 : mStartOffset + OutlookCalenderUtils.dayOfMonth(dayMillis) - 1, false);
 	}
 	
 	private void setSelectedPosition(int position, boolean notifyObservers)
@@ -131,20 +144,63 @@ public class OutlookMonthViewAdapter extends Adapter<CellViewHolder>
 		{
 			return;
 		}
-		
 		mSelectedPosition = position;
 		if (last >= 0)
 		{
 			notifyItemChanged(last);
 		}
-		
 		if (position >= 0)
 		{
-			notifyItemChanged(position, notifyObservers ? new SelectionPayload(mSelectedPosition - mStartOffset + 1) : null);
+			long timeMillis = mBaseTimeMillis + (mSelectedPosition - mStartOffset) * DateUtils.DAY_IN_MILLIS;
+			notifyItemChanged(position, notifyObservers ? new SelectionPayload(timeMillis) : null);
 		}
 	}
 	
-	protected static class CellViewHolder extends ViewHolder
+	void swapCursor(@NonNull Cursor cursor)
+	{
+		if (mCursor == cursor)
+		{
+			return;
+		}
+		mCursor = cursor;
+		Iterator<Integer> iterator = mEvents.iterator();
+		while (iterator.hasNext())
+		{
+			int dayIndex = iterator.next();
+			iterator.remove();
+			notifyItemChanged(dayIndex + mStartOffset);
+		}
+		if (!mCursor.moveToFirst())
+		{
+			return;
+		}
+		// TODO improve performance
+		do
+		{
+			long start = mCursor.getLong(mCursor.getColumnIndexOrThrow(CalendarContract.Events.DTSTART));
+			long end = mCursor.getLong(mCursor.getColumnIndexOrThrow(CalendarContract.Events.DTEND));
+			boolean allDay = mCursor.getInt(mCursor.getColumnIndexOrThrow(CalendarContract.Events.ALL_DAY)) == 1;
+			if (allDay)
+			{
+				end -= DateUtils.DAY_IN_MILLIS;
+			}
+			int startIndex = (int)((start - mBaseTimeMillis) / DateUtils.DAY_IN_MILLIS);
+			int endIndex = (int)((end - mBaseTimeMillis) / DateUtils.DAY_IN_MILLIS);
+			endIndex = Math.min(endIndex, getItemCount() - mStartOffset - 1);
+			for (int dayIndex = startIndex; dayIndex <= endIndex; dayIndex++)
+			{
+				if (!mEvents.contains(dayIndex))
+				{
+					mEvents.add(dayIndex);
+					notifyItemChanged(dayIndex + mStartOffset);
+				}
+			}
+		}
+		while (mCursor.moveToNext());
+	}
+	
+	protected static class CellViewHolder
+			extends ViewHolder
 	{
 		
 		public CellViewHolder(View itemView)
@@ -153,7 +209,8 @@ public class OutlookMonthViewAdapter extends Adapter<CellViewHolder>
 		}
 	}
 	
-	protected static class HeaderViewHolder extends CellViewHolder
+	protected static class HeaderViewHolder
+			extends CellViewHolder
 	{
 		
 		final TextView textView;
@@ -165,7 +222,8 @@ public class OutlookMonthViewAdapter extends Adapter<CellViewHolder>
 		}
 	}
 	
-	private static class ContentViewHolder extends CellViewHolder
+	private static class ContentViewHolder
+			extends CellViewHolder
 	{
 		
 		final TextView textView;
@@ -179,16 +237,16 @@ public class OutlookMonthViewAdapter extends Adapter<CellViewHolder>
 	
 	public static class SelectionPayload
 	{
-		final int dayOfMonth;
+		final long timeMillis;
 		
-		public SelectionPayload(int dayOfMonth)
+		public SelectionPayload(long timeMillis)
 		{
-			this.dayOfMonth = dayOfMonth;
+			this.timeMillis = timeMillis;
 		}
 	}
 	
 	/**
-	 *  Interface to listen change in date
+	 * Interface to listen change in date
 	 */
 	public interface OutlookOnDayCellClicked
 	{
@@ -200,12 +258,15 @@ public class OutlookMonthViewAdapter extends Adapter<CellViewHolder>
 	private static final int SPANS_COUNT       = 7;
 	
 	// Constructor Initialization
-	private final String[] mWeekdays;
-	private final int      mStartOffset;
-	private final int      mDays;
-	private LayoutInflater mLayoutInflater;
+	private final String[]       mWeekdays;
+	private final int            mStartOffset;
+	private final int            mDays;
+	private       LayoutInflater mLayoutInflater;
 	
 	private int mSelectedPosition = RecyclerView.NO_POSITION;
 	
 	private OutlookOnDayCellClicked mDayCellClickHandler;
+	private final Set<Integer> mEvents = new HashSet<>();
+	private       Cursor mCursor;
+	private final long   mBaseTimeMillis;
 }

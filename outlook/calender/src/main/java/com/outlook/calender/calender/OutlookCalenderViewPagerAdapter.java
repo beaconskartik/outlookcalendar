@@ -1,8 +1,10 @@
 package com.outlook.calender.calender;
 
-import android.os.Bundle;
-import android.os.Parcelable;
+import android.database.ContentObserver;
+import android.database.Cursor;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.v4.util.ArrayMap;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.view.View;
@@ -11,6 +13,8 @@ import android.view.ViewGroup;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+
+import com.outlook.calender.utils.OutlookCalenderUtils;
 
 /**
  * Created by ksachan on 7/4/17.
@@ -22,12 +26,12 @@ public class OutlookCalenderViewPagerAdapter extends PagerAdapter
     {
         mDateChangeListener = dateChangeListener;
         int mid = ITEM_COUNT / 2;
+        long todayMillis = OutlookCalenderUtils.monthFirstDay(OutlookCalenderUtils.today());
         for (int i = 0; i < getCount(); i++)
         {
-            Calendar calendar = Calendar.getInstance();
-            calendar.add(Calendar.MONTH, i - mid);
-            mCalendars.add(calendar);
+            mCalendars.add(OutlookCalenderUtils.addMonths(todayMillis, i - mid));
             mMonthViews.add(null);
+            mCursors.add(null);
         }
     }
     
@@ -63,41 +67,42 @@ public class OutlookCalenderViewPagerAdapter extends PagerAdapter
         return view.equals(object);
     }
     
-    
     public OutlookMonthView getMothView(int position)
     {
         return mMonthViews.get(position);
     }
     
-    public Calendar getCalendar(int position)
-    {
-        return mCalendars.get(position);
-    }
-    
-    public void shiftLeft()
+    void shiftLeft()
     {
         for (int i = 0; i < getCount() - 2; i++)
         {
-            Calendar first = mCalendars.remove(0);
-            first.add(Calendar.MONTH, getCount());
-            mCalendars.add(first);
+            mCalendars.add(OutlookCalenderUtils.addMonths(mCalendars.remove(0), getCount()));
         }
-    
+        // TODO only deactivate non reusable cursors
+        for (int i = 0; i < getCount(); i++)
+        {
+            swapCursor(i, null, null);
+        }
+        // rebind current item (2nd) and 2 adjacent items
         for (int i = 0; i <= 2; i++)
         {
             bind(i);
         }
     }
     
-    public void shiftRight()
+    void shiftRight()
     {
         for (int i = 0; i < getCount() - 2; i++)
         {
-            Calendar last = mCalendars.remove(getCount() - 1);
-            last.add(Calendar.MONTH, -getCount());
-            mCalendars.add(0, last);
+            mCalendars.add(0, OutlookCalenderUtils.addMonths(mCalendars.remove(getCount() - 1), -getCount()));
+            mCursors.add(0, mCursors.remove(getCount() - 1));
         }
-        
+        // TODO only deactivate non reusable cursors
+        for (int i = 0; i < getCount(); i++)
+        {
+            swapCursor(i, null, null);
+        }
+        // rebind current item (2nd to last) and 2 adjacent items
         for (int i = 0; i <= 2; i++)
         {
             bind(getCount() - 1 - i);
@@ -108,7 +113,7 @@ public class OutlookCalenderViewPagerAdapter extends PagerAdapter
     {
         if (mMonthViews.get(position) != null)
         {
-            mMonthViews.get(position).setCalendar(mCalendars.get(position));
+            mMonthViews.get(position).setMonthMillis(mCalendars.get(position));
         }
         bindSelectedDay(position);
     }
@@ -121,9 +126,9 @@ public class OutlookCalenderViewPagerAdapter extends PagerAdapter
         }
     }
     
-    public void setSelectedDay(int position, @NonNull Calendar selectedDay, boolean notifySelf)
+    public void setSelectedDay(int position, @NonNull long selectedDay, boolean notifySelf)
     {
-        mSelectedDay.set(selectedDay.get(Calendar.YEAR), selectedDay.get(Calendar.MONTH), selectedDay.get(Calendar.DAY_OF_MONTH));
+        mSelectedDay = selectedDay;
         if (notifySelf)
         {
             bindSelectedDay(position);
@@ -140,17 +145,58 @@ public class OutlookCalenderViewPagerAdapter extends PagerAdapter
         }
     }
     
-    public Calendar getSelectedDay()
+    void swapCursor(long monthMillis, @Nullable Cursor cursor, ContentObserver contentObserver)
+    {
+        for (int i = 0; i < mCalendars.size(); i++) {
+            if (OutlookCalenderUtils.sameMonth(monthMillis, mCalendars.get(i)))
+            {
+                swapCursor(i, cursor, contentObserver);
+                break;
+            }
+        }
+    }
+    
+    private void bindCursor(int position)
+    {
+        if (mCursors.get(position) != null && mMonthViews.get(position) != null)
+        {
+            mMonthViews.get(position).swapCursor(mCursors.get(position));
+        }
+    }
+    
+    public void deactivate(Cursor cursor)
+    {
+        if (cursor != null)
+        {
+            cursor.unregisterContentObserver(mObservers.get(cursor));
+            mObservers.remove(cursor);
+            cursor.close();
+        }
+    }
+    
+    public Cursor getCursor(int position)
+    {
+        return mCursors.get(position);
+    }
+    
+    long getMonth(int position)
+    {
+        return mCalendars.get(position);
+    }
+    
+    public long getSelectedDay()
     {
         return mSelectedDay;
     }
     
     // Member Variables
     
-    static final  int                    ITEM_COUNT   = 5;
-    private final List<OutlookMonthView> mMonthViews  = new ArrayList<>(getCount());
-    private final List<Calendar>         mCalendars   = new ArrayList<>(getCount());
-    private final Calendar               mSelectedDay = Calendar.getInstance();
+    static final  int                               ITEM_COUNT   = 5;
+    private final List<OutlookMonthView>            mMonthViews  = new ArrayList<>(getCount());
+    private final List<Long>                        mCalendars   = new ArrayList<>(getCount());
+    private       long                              mSelectedDay = OutlookCalenderUtils.today();
+    private final List<Cursor>                      mCursors     = new ArrayList<>(getCount());
+    private final ArrayMap<Cursor, ContentObserver> mObservers   = new ArrayMap<>(getCount());
     private OutlookMonthView.OnDateChangeListener mDateChangeListener;
 }
 

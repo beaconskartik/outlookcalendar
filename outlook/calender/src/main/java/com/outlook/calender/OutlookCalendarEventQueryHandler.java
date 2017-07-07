@@ -10,12 +10,13 @@ import com.outlook.calender.agenda.OutlookAgendaCursorAdapter;
  * Created by ksachan on 7/6/17.
  */
 
-public class OutlookCalendarQueryHandler extends AsyncQueryHandler
+public class OutlookCalendarEventQueryHandler
+		extends AsyncQueryHandler
 {
 	
 	private final OutlookAgendaCursorAdapter mAgendaCursorAdapter;
 	
-	public OutlookCalendarQueryHandler(ContentResolver cr, OutlookAgendaCursorAdapter agendaCursorAdapter)
+	public OutlookCalendarEventQueryHandler(ContentResolver cr, OutlookAgendaCursorAdapter agendaCursorAdapter)
 	{
 		super(cr);
 		mAgendaCursorAdapter = agendaCursorAdapter;

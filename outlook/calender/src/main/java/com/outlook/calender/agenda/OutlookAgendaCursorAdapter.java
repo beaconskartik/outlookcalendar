@@ -1,14 +1,11 @@
 package com.outlook.calender.agenda;
 
-import android.content.AsyncQueryHandler;
-import android.content.ContentResolver;
 import android.content.Context;
-import android.database.Cursor;
 import android.provider.CalendarContract;
 import android.support.v7.widget.RecyclerView;
 import android.text.format.DateUtils;
 
-import com.outlook.calender.OutlookCalendarQueryHandler;
+import com.outlook.calender.OutlookCalendarEventQueryHandler;
 
 /**
  * Created by ksachan on 7/6/17.
@@ -19,7 +16,7 @@ public class OutlookAgendaCursorAdapter extends OutlookAgendaAdapter
 	public OutlookAgendaCursorAdapter(Context context)
 	{
 		super(context);
-		mHandler = new OutlookCalendarQueryHandler(context.getContentResolver(), this);
+		mHandler = new OutlookCalendarEventQueryHandler(context.getContentResolver(), this);
 	}
 	
 	@Override
@@ -52,5 +49,5 @@ public class OutlookAgendaCursorAdapter extends OutlookAgendaAdapter
 			CalendarContract.Events.TITLE
 	};
 	
-	private final OutlookCalendarQueryHandler mHandler;
+	private final OutlookCalendarEventQueryHandler mHandler;
 }

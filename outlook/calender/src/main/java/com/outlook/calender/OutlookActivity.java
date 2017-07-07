@@ -24,6 +24,7 @@ import android.widget.Toast;
 import com.outlook.calender.agenda.OutlookAgendaAdapter;
 import com.outlook.calender.agenda.OutlookAgendaCursorAdapter;
 import com.outlook.calender.agenda.OutlookAgendaView;
+import com.outlook.calender.calender.OutlookCalendarCursorAdapter;
 import com.outlook.calender.calender.OutlookCalenderViewPager;
 
 public class OutlookActivity extends AppCompatActivity
@@ -82,12 +83,11 @@ public class OutlookActivity extends AppCompatActivity
     {
         super.onPostCreate(savedInstanceState);
     
-        mOutlookAgendaCalenderManager = new OutlookAgendaCalenderManager(mToolbarCheckedTextView,
-                mCalendarView, mAgendaView);
+        mOutlookAgendaCalenderManager = new OutlookAgendaCalenderManager(mToolbarCheckedTextView, mCalendarView, mAgendaView);
         
         if (checkPermissions())
         {
-          loadEvents();
+            loadEvents();
         }
         else
         {
@@ -143,8 +143,9 @@ public class OutlookActivity extends AppCompatActivity
         return super.onOptionsItemSelected(item);
     }
     
-    public void  loadEvents()
+    public void loadEvents()
     {
+        mCalendarView.setCalendarAdapter(new OutlookCalendarCursorAdapter(this));
         mAgendaView.setAdapter(new OutlookAgendaCursorAdapter(this));
     }
     
@@ -168,8 +169,8 @@ public class OutlookActivity extends AppCompatActivity
     }
     
     private OutlookAgendaCalenderManager mOutlookAgendaCalenderManager;
-    private  OutlookCalenderViewPager     mCalendarView;
-    private  OutlookAgendaView            mAgendaView;
-    private  OutlookAgendaAdapter         mAgendaAdapter;
-    private  AppCompatCheckedTextView     mToolbarCheckedTextView;
+    private OutlookCalenderViewPager     mCalendarView;
+    private OutlookAgendaView            mAgendaView;
+    private OutlookAgendaAdapter         mAgendaAdapter;
+    private AppCompatCheckedTextView     mToolbarCheckedTextView;
 }

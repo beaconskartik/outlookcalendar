@@ -1,12 +1,7 @@
 package com.outlook.calender.agenda;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
-
 import android.content.Context;
 import android.database.Cursor;
-import android.os.Handler;
 import android.support.v4.util.Pair;
 import android.support.v7.text.AllCapsTransformationMethod;
 import android.support.v7.widget.RecyclerView;
@@ -19,6 +14,7 @@ import android.widget.TextView;
 
 import com.outlook.calender.R;
 import com.outlook.calender.agenda.OutlookAgendaAdapter.AgendaViewHolder;
+import com.outlook.calender.agenda.OutlookAgendaEventGroup.OutlookEventObserver;
 import com.outlook.calender.utils.OutlookCalenderUtils;
 
 /**
@@ -61,18 +57,43 @@ public abstract class OutlookAgendaAdapter extends Adapter<AgendaViewHolder>
 		{
 			return;
 		}
+		
+		OutlookAgendaItem item = getAdapterItem(position);
 		if (agendaViewHolder instanceof HeaderViewHolder)
 		{
 			loadEvents(position);
-		}
-		OutlookAgendaItem item = getAdapterItem(position);
-		if (item instanceof OutlookAgendaNoEvent)
-		{
-			agendaViewHolder.textView.setText(R.string.no_event);
+			((HeaderViewHolder)agendaViewHolder).textView.setText(item.mTitle);
 		}
 		else
 		{
-			agendaViewHolder.textView.setText(item.mTitle);
+			ContentViewHolder contentHolder = (ContentViewHolder)agendaViewHolder;
+			if (item instanceof OutlookAgendaNoEvent)
+			{
+				contentHolder.textViewTime.setVisibility(View.GONE);
+				contentHolder.textViewTitle.setText(R.string.no_event);
+			}
+			else
+			{
+				OutlookAgendaEventItem eventItem = (OutlookAgendaEventItem)item;
+				contentHolder.textViewTime.setVisibility(View.VISIBLE);
+				if (eventItem.mIsAllDay)
+				{
+					contentHolder.textViewTime.setText(R.string.all_day);
+				}
+				else
+				{
+					contentHolder.textViewTime.setText(OutlookCalenderUtils.toTimeString(contentHolder.textViewTime.getContext(), eventItem.mStartTimeMillis));
+				}
+				contentHolder.textViewTitle.setText(item.mTitle);
+			}
+			contentHolder.itemView.setOnClickListener(new View.OnClickListener()
+			{
+				@Override
+				public void onClick(View v)
+				{
+					// TODO
+				}
+			});
 		}
 	}
 	
@@ -95,6 +116,10 @@ public abstract class OutlookAgendaAdapter extends Adapter<AgendaViewHolder>
 		}
 	}
 	
+	/**
+	 * Load event for given day
+	 * @param timeMillis
+	 */
 	protected void loadEvents(long timeMillis)
 	{
 		// override to load events
@@ -116,7 +141,7 @@ public abstract class OutlookAgendaAdapter extends Adapter<AgendaViewHolder>
 		Pair<OutlookAgendaEventGroup, Integer> pair = findGroup(timeMillis);
 		if (pair != null)
 		{
-			pair.first.setCursor(cursor, mEventObserver);
+			pair.first.setCursor(cursor, mOutlookEventObserver);
 			notifyEventsChanged(pair.first, pair.second);
 		}
 	}
@@ -167,7 +192,7 @@ public abstract class OutlookAgendaAdapter extends Adapter<AgendaViewHolder>
 		return pair.second;
 	}
 	
-	OutlookAgendaItem getAdapterItem(int position)
+	public OutlookAgendaItem getAdapterItem(int position)
 	{
 		return mEventGroups.getGroupOrItem(position);
 	}
@@ -183,7 +208,7 @@ public abstract class OutlookAgendaAdapter extends Adapter<AgendaViewHolder>
 	void prepend(Context context)
 	{
 		long daysMillis = mEventGroups.size() * DateUtils.DAY_IN_MILLIS;
-		int count = MONTH_SIZE, inserted = 0;
+		int count = BLOCK_SIZE, inserted = 0;
 		for (int i = 0; i < count; i++)
 		{
 			OutlookAgendaEventGroup last = mEventGroups.get(mEventGroups.size() - 1 - i);
@@ -205,10 +230,10 @@ public abstract class OutlookAgendaAdapter extends Adapter<AgendaViewHolder>
 	 */
 	void append(Context context)
 	{
-		int count = MONTH_SIZE;
+		int count = BLOCK_SIZE;
 		if (mEventGroups.isEmpty())
 		{
-			long today = OutlookCalenderUtils.stripTime(Calendar.getInstance()).getTimeInMillis();
+			long today = OutlookCalenderUtils.today();
 			for (int i = 0; i < count; i++)
 			{
 				mEventGroups.add(new OutlookAgendaEventGroup(context, today + DateUtils.DAY_IN_MILLIS * i));
@@ -327,19 +352,17 @@ public abstract class OutlookAgendaAdapter extends Adapter<AgendaViewHolder>
 		public AgendaViewHolder(View itemView)
 		{
 			super(itemView);
-			textView = (TextView)itemView;
 		}
-		
-		final TextView textView;
 	}
 	
 	static class HeaderViewHolder
 			extends AgendaViewHolder
 	{
-		
+		final TextView textView;
 		public HeaderViewHolder(View itemView)
 		{
 			super(itemView);
+			textView = (TextView) itemView;
 			textView.setTransformationMethod(new AllCapsTransformationMethod(textView.getContext()));
 		}
 	}
@@ -347,20 +370,25 @@ public abstract class OutlookAgendaAdapter extends Adapter<AgendaViewHolder>
 	static class ContentViewHolder
 			extends AgendaViewHolder
 	{
+		final TextView textViewTitle;
+		final TextView textViewTime;
 		public ContentViewHolder(View itemView)
 		{
 			super(itemView);
+			textViewTitle = (TextView) itemView.findViewById(R.id.text_view_title);
+			textViewTime = (TextView) itemView.findViewById(R.id.text_view_time);
 		}
 	}
 	
 	public static final int MONTH_SIZE = 31;
 	
 	private Context mContext;
-	static final         int MAX_SIZE          = MONTH_SIZE * 2;
+	private static final int BLOCK_SIZE = MONTH_SIZE * 2;
+	private static final         int MAX_SIZE          = MONTH_SIZE * 3;
 	private static final int VIEW_TYPE_HEADER  = 0;
 	private static final int VIEW_TYPE_CONTENT = 1;
 	
-	private final OutlookAgendaEventGroup.EventObserver mEventObserver = new OutlookAgendaEventGroup.EventObserver()
+	private final OutlookEventObserver   mOutlookEventObserver = new OutlookEventObserver()
 	{
 		@Override
 		public void onChange(long timeMillis)
@@ -368,7 +396,7 @@ public abstract class OutlookAgendaAdapter extends Adapter<AgendaViewHolder>
 			loadEvents(timeMillis);
 		}
 	};
-	private final OutlookAgendaEventList                mEventGroups   = new OutlookAgendaEventList(MONTH_SIZE);
+	private final OutlookAgendaEventList mEventGroups          = new OutlookAgendaEventList(BLOCK_SIZE);
 	private final LayoutInflater mInflater;
 	private       boolean        mLock;
 }

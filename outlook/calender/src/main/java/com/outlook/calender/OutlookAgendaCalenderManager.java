@@ -6,7 +6,6 @@ import android.support.annotation.NonNull;
 import android.support.v7.widget.AppCompatCheckedTextView;
 import android.util.Log;
 import android.view.View;
-import android.widget.TextView;
 
 import com.outlook.calender.agenda.OutlookAgendaView;
 import com.outlook.calender.calender.OutlookCalenderViewPager;
@@ -35,9 +34,9 @@ public class OutlookAgendaCalenderManager
 		mCalendarView = calendarView;
 		mAgendaView = agendaView;
 		
-		if (mSelectedDate == null)
+		if (mSelectedDate < 0)
 		{
-			mSelectedDate = OutlookCalenderUtils.stripTime(Calendar.getInstance());
+			mSelectedDate = OutlookCalenderUtils.today();
 		}
 		
 		calendarView.setSelectedDay(mSelectedDate);
@@ -48,7 +47,7 @@ public class OutlookAgendaCalenderManager
 		agendaView.setOnDateChangeListener(mAgendaListener);
 	}
 	
-	private void sync(@NonNull Calendar calendar, View originator)
+	private void sync(@NonNull long calendar, View originator)
 	{
 		mSelectedDate = calendar;
 		if (!originator.equals(mCalendarView))
@@ -63,17 +62,16 @@ public class OutlookAgendaCalenderManager
 		updateTitle(calendar);
 	}
 	
-	private void updateTitle(Calendar calendar)
+	private void updateTitle(long dayMillis)
 	{
-		mTextView.setText(OutlookCalenderUtils.toMonthString(mTextView.getContext(), calendar.getTimeInMillis()));
+		mTextView.setText(OutlookCalenderUtils.toMonthString(mTextView.getContext(), dayMillis));
 	}
 	
 	private final OutlookCalenderViewPager.OnChangeListener mCalendarListener = new OutlookCalenderViewPager.OnChangeListener()
 	{
 		@Override
-		public void onSelectedDayChange(@NonNull Calendar calendar)
+		public void onSelectedDayChange(@NonNull long calendar)
 		{
-			Log.d("kartik", "Month : " + OutlookCalenderUtils.toMonthString(mTextView.getContext(), calendar.getTimeInMillis()));
 			sync(calendar, mCalendarView);
 		}
 	};
@@ -81,10 +79,9 @@ public class OutlookAgendaCalenderManager
 	private final OutlookAgendaView.OnDateChangeListener mAgendaListener = new OutlookAgendaView.OnDateChangeListener()
 	{
 		@Override
-		public void onSelectedDayChange(@NonNull Calendar calendar)
+		public void onSelectedDayChange(@NonNull long calendar)
 		{
-			Log.d("kartik", "Month : " + OutlookCalenderUtils.toMonthString(mTextView.getContext(), calendar.getTimeInMillis())
-			+ " Day : " + calendar.get(Calendar.DAY_OF_MONTH));
+			
 			sync(calendar, mAgendaView);
 		}
 	};
@@ -92,5 +89,5 @@ public class OutlookAgendaCalenderManager
 	private AppCompatCheckedTextView          mTextView;
 	private OutlookCalenderViewPager mCalendarView;
 	private OutlookAgendaView        mAgendaView;
-	private Calendar      mSelectedDate;
+	private long      mSelectedDate;
 }

@@ -9,6 +9,28 @@ import android.os.Parcel;
 public class OutlookAgendaEventItem
 		extends OutlookAgendaItem
 {
+	public OutlookAgendaEventItem(String title, long timeMillis, long startTimeMillis, boolean allday)
+	{
+		super(title, timeMillis);
+		mStartTimeMillis = startTimeMillis;
+		mIsAllDay = allday;
+	}
+	
+	protected OutlookAgendaEventItem(Parcel source)
+	{
+		super(source);
+		mStartTimeMillis = source.readLong();
+		mIsAllDay = source.readInt()  == 1;
+	}
+	
+	@Override
+	public void writeToParcel(Parcel dest, int flags)
+	{
+		super.writeToParcel(dest, flags);
+		dest.writeLong(mStartTimeMillis);
+		dest.writeInt(mIsAllDay ? 1 : 0);
+	}
+	
 	public static Creator<OutlookAgendaEventItem> CREATOR = new Creator<OutlookAgendaEventItem>()
 	{
 		@Override
@@ -23,24 +45,7 @@ public class OutlookAgendaEventItem
 			return new OutlookAgendaEventItem[size];
 		}
 	};
-	private long mStartTimeMillis;
 	
-	public OutlookAgendaEventItem(String title, long timeMillis, long startTimeMillis)
-	{
-		super(title, timeMillis);
-		this.mStartTimeMillis = startTimeMillis;
-	}
-	
-	protected OutlookAgendaEventItem(Parcel source)
-	{
-		super(source);
-		mStartTimeMillis = source.readLong();
-	}
-	
-	@Override
-	public void writeToParcel(Parcel dest, int flags)
-	{
-		super.writeToParcel(dest, flags);
-		dest.writeLong(mStartTimeMillis);
-	}
+	protected  long mStartTimeMillis;
+	protected boolean mIsAllDay;
 }

@@ -3,6 +3,7 @@ package com.outlook.calender.calender;
 import java.util.Calendar;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.GridLayoutManager;
@@ -12,6 +13,7 @@ import android.view.View;
 
 import com.outlook.calender.calender.OutlookMonthViewAdapter.OutlookOnDayCellClicked;
 import com.outlook.calender.calender.OutlookMonthViewAdapter.SelectionPayload;
+import com.outlook.calender.utils.OutlookCalenderUtils;
 
 /**
  * Created by ksachan on 7/4/17.
@@ -39,7 +41,7 @@ public class OutlookMonthView extends RecyclerView
 	{
 		setLayoutManager(new GridLayoutManager(getContext(), SPAN_COUNT));
 		setHasFixedSize(true);
-		setCalendar(Calendar.getInstance());
+		setMonthMillis(OutlookCalenderUtils.today());
 	}
 	
 	public void setOnDateChangeListener(OnDateChangeListener listener)
@@ -47,10 +49,10 @@ public class OutlookMonthView extends RecyclerView
 		mDateChangeListener = listener;
 	}
 	
-	public void setCalendar(Calendar calendar)
+	public void setMonthMillis(long monthMillis)
 	{
-		mCalendar = calendar;
-		mAdapter = new OutlookMonthViewAdapter(getContext(), calendar, new OutlookOnDayCellClicked()
+		mMonthMillis = monthMillis;
+		mAdapter = new OutlookMonthViewAdapter(getContext(), monthMillis, new OutlookOnDayCellClicked()
 		{
 			@Override
 			public void onClick(View view)
@@ -70,11 +72,8 @@ public class OutlookMonthView extends RecyclerView
 				}
 				if (payload != null && payload instanceof SelectionPayload)
 				{
-					Calendar selectedDay = Calendar.getInstance();
-					selectedDay.set(mCalendar.get(Calendar.YEAR), mCalendar.get(Calendar.MONTH), ((SelectionPayload)payload).dayOfMonth);
-					
 					// triggering the call for selected day change
-					mDateChangeListener.onSelectedDayChange(selectedDay);
+					mDateChangeListener.onSelectedDayChange(((SelectionPayload) payload).timeMillis);
 				}
 			}
 		});
@@ -82,25 +81,29 @@ public class OutlookMonthView extends RecyclerView
 		setAdapter(mAdapter);
 	}
 	
-	public void setSelectedDay(Calendar calendar)
+	void setSelectedDay(long dayMillis)
 	{
-		if (mCalendar == null)
+		if (OutlookCalenderUtils.isNotTime(mMonthMillis))
 		{
 			return;
 		}
-		if (calendar == null)
+		if (OutlookCalenderUtils.isNotTime(dayMillis))
 		{
-			mAdapter.setSelectedDay(null);
+			mAdapter.setSelectedDay(OutlookCalenderUtils.NO_TIME_MILLIS);
 		}
-		else if (mCalendar.get(Calendar.YEAR) == calendar.get(Calendar.YEAR)
-				 && mCalendar.get(Calendar.MONTH) == calendar.get(Calendar.MONTH))
+		else if (OutlookCalenderUtils.sameMonth(mMonthMillis, dayMillis))
 		{
-			mAdapter.setSelectedDay(calendar);
+			mAdapter.setSelectedDay(dayMillis);
 		}
 		else
 		{
-			mAdapter.setSelectedDay(null);
+			mAdapter.setSelectedDay(OutlookCalenderUtils.NO_TIME_MILLIS);
 		}
+	}
+	
+	public void swapCursor(@NonNull Cursor cursor)
+	{
+		mAdapter.swapCursor(cursor);
 	}
 	
 	/**
@@ -108,11 +111,11 @@ public class OutlookMonthView extends RecyclerView
 	 */
 	interface OnDateChangeListener
 	{
-		void onSelectedDayChange(@NonNull Calendar calendar);
+		void onSelectedDayChange(long dayMillis);
 	}
 	
 	private static int SPAN_COUNT = 7; // 7 days in a week so grid is of 7
-	private Calendar                mCalendar;
+	private long                    mMonthMillis;
 	private OutlookMonthViewAdapter mAdapter;
 	private OnDateChangeListener    mDateChangeListener;
 }

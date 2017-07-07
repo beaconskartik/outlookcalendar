@@ -1,8 +1,9 @@
 package com.outlook.calender.calender;
 
-import java.util.Calendar;
-
 import android.content.Context;
+import android.database.ContentObserver;
+import android.database.Cursor;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
@@ -50,6 +51,7 @@ public class OutlookCalenderViewPager extends ViewPager
     {
         mAdapter = new OutlookCalenderViewPagerAdapter(mDateChangeListener);
         setAdapter(mAdapter);
+        setCurrentItem(mAdapter.getCount() / 2);
     
         addOnPageChangeListener(new SimpleOnPageChangeListener()
         {
@@ -60,7 +62,7 @@ public class OutlookCalenderViewPager extends ViewPager
                 if (mDragging)
                 {
                     toFirstDay(position);
-                    notifyDayChange(mAdapter.getCalendar(position));
+                    notifyDayChange(mAdapter.getMonth(position));
                 }
                 
                 mDragging = false;
@@ -89,12 +91,11 @@ public class OutlookCalenderViewPager extends ViewPager
     
     private void toFirstDay(int position)
     {
-        Calendar calendar = mAdapter.getCalendar(position);
-        calendar.set(Calendar.DAY_OF_MONTH, 1);
-        mAdapter.setSelectedDay(position, calendar, true);
+        mAdapter.setSelectedDay(position,
+                OutlookCalenderUtils.monthFirstDay(mAdapter.getMonth(position)), true);
     }
     
-    private void notifyDayChange(@NonNull Calendar calendar)
+    private void notifyDayChange(@NonNull long calendar)
     {
         if (mListener != null)
         {
@@ -128,42 +129,87 @@ public class OutlookCalenderViewPager extends ViewPager
         }
     }
     
-    public void setSelectedDay(@NonNull Calendar selectedDay)
+    public void setSelectedDay(long dayMillis)
     {
         // notify active page and its neighbors
         int position = getCurrentItem();
-        if (OutlookCalenderUtils.monthBefore(selectedDay, mAdapter.getSelectedDay()))
+        if (OutlookCalenderUtils.monthBefore(dayMillis, mAdapter.getSelectedDay()))
         {
-            mAdapter.setSelectedDay(position - 1, selectedDay, true);
+            mAdapter.setSelectedDay(position - 1, dayMillis, true);
             setCurrentItem(position - 1, true);
         }
-        else if (OutlookCalenderUtils.monthAfter(selectedDay, mAdapter.getSelectedDay()))
+        else if (OutlookCalenderUtils.monthAfter(dayMillis, mAdapter.getSelectedDay()))
         {
-            mAdapter.setSelectedDay(position + 1, selectedDay, true);
+            mAdapter.setSelectedDay(position + 1, dayMillis, true);
             setCurrentItem(position + 1, true);
         }
         else
         {
-            mAdapter.setSelectedDay(position, selectedDay, true);
+            mAdapter.setSelectedDay(position, dayMillis, true);
         }
+    }
+    
+    public void setCalendarAdapter(@NonNull OutlookCalendarCursorAdapter adapter)
+    {
+        mCalendarAdapter = adapter;
+        mCalendarAdapter.setCalendarView(this);
+        loadEvents(getCurrentItem());
     }
     
     public interface OnChangeListener
     {
-        void onSelectedDayChange(@NonNull Calendar calendar);
+        void onSelectedDayChange(@NonNull long calendar);
+    }
+    
+    private void loadEvents(int position) {
+        if (mCalendarAdapter != null && mAdapter.getCursor(position) == null) {
+            mCalendarAdapter.loadEvents(mAdapter.getMonth(position));
+        }
+    }
+    
+    protected void swapCursor(long monthMillis, Cursor cursor) {
+        mAdapter.swapCursor(monthMillis, cursor, new PagerContentObserver(monthMillis));
+    }
+    
+    class PagerContentObserver extends ContentObserver
+    {
+        
+        private final long monthMillis;
+        
+        public PagerContentObserver(long monthMillis) {
+            super(new Handler());
+            this.monthMillis = monthMillis;
+        }
+        
+        @Override
+        public boolean deliverSelfNotifications() {
+            return true;
+        }
+        
+        @Override
+        public void onChange(boolean selfChange) {
+            // invalidate previous cursor for given month
+            mAdapter.swapCursor(monthMillis, null, null);
+            // reload events if given month is active month
+            // hidden months will be reloaded upon being swiped to
+            if (OutlookCalenderUtils.sameMonth(monthMillis, mAdapter.getMonth(getCurrentItem()))) {
+                loadEvents(getCurrentItem());
+            }
+        }
     }
     
     // member variables
     private final OutlookMonthView.OnDateChangeListener mDateChangeListener = new OutlookMonthView.OnDateChangeListener()
     {
         @Override
-        public void onSelectedDayChange(@NonNull Calendar calendar)
+        public void onSelectedDayChange(long dayMillis)
         {
-            mAdapter.setSelectedDay(getCurrentItem(), calendar, false);
-            notifyDayChange(calendar);
+            mAdapter.setSelectedDay(getCurrentItem(), dayMillis, false);
+            notifyDayChange(dayMillis);
         }
     };
     private OnChangeListener                mListener;
     private OutlookCalenderViewPagerAdapter mAdapter;
+    private OutlookCalendarCursorAdapter mCalendarAdapter;
 }
 
