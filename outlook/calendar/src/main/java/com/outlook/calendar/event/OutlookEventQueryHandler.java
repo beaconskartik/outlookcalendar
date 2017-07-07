@@ -6,7 +6,7 @@ import android.database.Cursor;
 import android.provider.CalendarContract;
 
 import com.outlook.calendar.OutlookEventCursor;
-import com.outlook.calendar.utils.OutlookCalenderUtils;
+import com.outlook.calendar.utils.OutlookCalendarUtils;
 
 /**
  * Created by ksachan on 7/7/17.
@@ -53,8 +53,8 @@ public abstract class OutlookEventQueryHandler
 	}
 	
 	public final void startQuery(Object cookie, long startTimeMillis, long endTimeMillis) {
-		String utcStart = String.valueOf(OutlookCalenderUtils.toUtcTimeZone(startTimeMillis)),
-				utcEnd = String.valueOf(OutlookCalenderUtils.toUtcTimeZone(endTimeMillis)),
+		String utcStart = String.valueOf(OutlookCalendarUtils.toUtcTimeZone(startTimeMillis)),
+				utcEnd = String.valueOf(OutlookCalendarUtils.toUtcTimeZone(endTimeMillis)),
 				localStart = String.valueOf(startTimeMillis),
 				localEnd = String.valueOf(endTimeMillis);
 		String[] args = new String[]{

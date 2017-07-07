@@ -12,7 +12,7 @@ import android.view.ViewGroup;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.outlook.calendar.utils.OutlookCalenderUtils;
+import com.outlook.calendar.utils.OutlookCalendarUtils;
 
 /**
  * Created by ksachan on 7/4/17.
@@ -25,10 +25,10 @@ public class OutlookCalendarViewPagerAdapter
     {
         mDateChangeListener = dateChangeListener;
         int mid = ITEM_COUNT / 2;
-        long todayMillis = OutlookCalenderUtils.monthFirstDay(OutlookCalenderUtils.today());
+        long todayMillis = OutlookCalendarUtils.monthFirstDay(OutlookCalendarUtils.today());
         for (int i = 0; i < getCount(); i++)
         {
-            mCalendars.add(OutlookCalenderUtils.addMonths(todayMillis, i - mid));
+            mCalendars.add(OutlookCalendarUtils.addMonths(todayMillis, i - mid));
             mMonthViews.add(null);
             mCursors.add(null);
         }
@@ -75,7 +75,7 @@ public class OutlookCalendarViewPagerAdapter
     {
         for (int i = 0; i < getCount() - 2; i++)
         {
-            mCalendars.add(OutlookCalenderUtils.addMonths(mCalendars.remove(0), getCount()));
+            mCalendars.add(OutlookCalendarUtils.addMonths(mCalendars.remove(0), getCount()));
         }
         // TODO only deactivate non reusable cursors
         for (int i = 0; i < getCount(); i++)
@@ -93,7 +93,7 @@ public class OutlookCalendarViewPagerAdapter
     {
         for (int i = 0; i < getCount() - 2; i++)
         {
-            mCalendars.add(0, OutlookCalenderUtils.addMonths(mCalendars.remove(getCount() - 1), -getCount()));
+            mCalendars.add(0, OutlookCalendarUtils.addMonths(mCalendars.remove(getCount() - 1), -getCount()));
             mCursors.add(0, mCursors.remove(getCount() - 1));
         }
         // TODO only deactivate non reusable cursors
@@ -152,7 +152,7 @@ public class OutlookCalendarViewPagerAdapter
     void swapCursor(long monthMillis, @Nullable Cursor cursor, ContentObserver contentObserver)
     {
         for (int i = 0; i < mCalendars.size(); i++) {
-            if (OutlookCalenderUtils.sameMonth(monthMillis, mCalendars.get(i)))
+            if (OutlookCalendarUtils.sameMonth(monthMillis, mCalendars.get(i)))
             {
                 swapCursor(i, cursor, contentObserver);
                 break;
@@ -198,7 +198,7 @@ public class OutlookCalendarViewPagerAdapter
     static final  int                               ITEM_COUNT   = 5;
     private final List<OutlookMonthView>            mMonthViews  = new ArrayList<>(getCount());
     private final List<Long>                        mCalendars   = new ArrayList<>(getCount());
-    private       long                              mSelectedDay = OutlookCalenderUtils.today();
+    private       long                              mSelectedDay = OutlookCalendarUtils.today();
     private final List<Cursor>                      mCursors     = new ArrayList<>(getCount());
     private final ArrayMap<Cursor, ContentObserver> mObservers   = new ArrayMap<>(getCount());
     private OutlookMonthView.OnDateChangeListener mDateChangeListener;

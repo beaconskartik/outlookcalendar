@@ -9,7 +9,7 @@ import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
 import android.view.View;
 
-import com.outlook.calendar.utils.OutlookCalenderUtils;
+import com.outlook.calendar.utils.OutlookCalendarUtils;
 
 /**
  * Created by ksachan on 7/4/17.
@@ -93,7 +93,7 @@ public class OutlookCalendarViewPager
     private void toFirstDay(int position)
     {
         mAdapter.setSelectedDay(position,
-                OutlookCalenderUtils.monthFirstDay(mAdapter.getMonth(position)), true);
+                OutlookCalendarUtils.monthFirstDay(mAdapter.getMonth(position)), true);
     }
     
     private void notifyDayChange(@NonNull long calendar)
@@ -134,12 +134,12 @@ public class OutlookCalendarViewPager
     {
         // notify active page and its neighbors
         int position = getCurrentItem();
-        if (OutlookCalenderUtils.monthBefore(dayMillis, mAdapter.getSelectedDay()))
+        if (OutlookCalendarUtils.monthBefore(dayMillis, mAdapter.getSelectedDay()))
         {
             mAdapter.setSelectedDay(position - 1, dayMillis, true);
             setCurrentItem(position - 1, true);
         }
-        else if (OutlookCalenderUtils.monthAfter(dayMillis, mAdapter.getSelectedDay()))
+        else if (OutlookCalendarUtils.monthAfter(dayMillis, mAdapter.getSelectedDay()))
         {
             mAdapter.setSelectedDay(position + 1, dayMillis, true);
             setCurrentItem(position + 1, true);
@@ -193,7 +193,7 @@ public class OutlookCalendarViewPager
             mAdapter.swapCursor(monthMillis, null, null);
             // reload events if given month is active month
             // hidden months will be reloaded upon being swiped to
-            if (OutlookCalenderUtils.sameMonth(monthMillis, mAdapter.getMonth(getCurrentItem()))) {
+            if (OutlookCalendarUtils.sameMonth(monthMillis, mAdapter.getMonth(getCurrentItem()))) {
                 loadEvents(getCurrentItem());
             }
         }

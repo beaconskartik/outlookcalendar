@@ -26,7 +26,7 @@ import com.outlook.calender.R;
 import com.outlook.calendar.calendar.OutlookMonthViewAdapter.CellViewHolder;
 import com.outlook.calendar.decorator.OutlookCircleDecorator;
 import com.outlook.calendar.decorator.OutlookDotDecorator;
-import com.outlook.calendar.utils.OutlookCalenderUtils;
+import com.outlook.calendar.utils.OutlookCalendarUtils;
 
 /**
  * Created by ksachan on 7/4/17.
@@ -37,9 +37,9 @@ public class OutlookMonthViewAdapter extends Adapter<CellViewHolder>
 	public OutlookMonthViewAdapter(Context context, long monthMillis, OutlookOnDayCellClicked handler)
 	{
 		mWeekdays = DateFormatSymbols.getInstance().getShortWeekdays();
-		mBaseTimeMillis = OutlookCalenderUtils.monthFirstDay(monthMillis);
-		mStartOffset = OutlookCalenderUtils.monthFirstDayOffset(mBaseTimeMillis) + SPANS_COUNT;
-		mDays = mStartOffset + OutlookCalenderUtils.monthSize(monthMillis);
+		mBaseTimeMillis = OutlookCalendarUtils.monthFirstDay(monthMillis);
+		mStartOffset = OutlookCalendarUtils.monthFirstDayOffset(mBaseTimeMillis) + SPANS_COUNT;
+		mDays = mStartOffset + OutlookCalendarUtils.monthSize(monthMillis);
 		mDayCellClickHandler = handler;
 		mLayoutInflater = LayoutInflater.from(context);
 	}
@@ -133,7 +133,7 @@ public class OutlookMonthViewAdapter extends Adapter<CellViewHolder>
 	
 	public void setSelectedDay(long dayMillis)
 	{
-		setSelectedPosition(OutlookCalenderUtils.isNotTime(dayMillis) ? -1 : mStartOffset + OutlookCalenderUtils.dayOfMonth(dayMillis) - 1, false);
+		setSelectedPosition(OutlookCalendarUtils.isNotTime(dayMillis) ? -1 : mStartOffset + OutlookCalendarUtils.dayOfMonth(dayMillis) - 1, false);
 	}
 	
 	private void setSelectedPosition(int position, boolean notifyObservers)

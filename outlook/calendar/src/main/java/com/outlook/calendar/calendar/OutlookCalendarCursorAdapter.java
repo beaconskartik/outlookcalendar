@@ -5,7 +5,7 @@ import android.database.Cursor;
 import android.text.format.DateUtils;
 
 import com.outlook.calendar.event.OutlookMonthEventQueryHanlder;
-import com.outlook.calendar.utils.OutlookCalenderUtils;
+import com.outlook.calendar.utils.OutlookCalendarUtils;
 
 /**
  * Created by ksachan on 7/7/17.
@@ -35,9 +35,9 @@ public class OutlookCalendarCursorAdapter
 	 */
 	protected void loadEvents(long monthMillis)
 	{
-		long startTimeMillis = OutlookCalenderUtils.monthFirstDay(monthMillis),
+		long startTimeMillis = OutlookCalendarUtils.monthFirstDay(monthMillis),
 				endTimeMillis = startTimeMillis + DateUtils.DAY_IN_MILLIS *
-												  OutlookCalenderUtils.monthSize(monthMillis);
+												  OutlookCalendarUtils.monthSize(monthMillis);
 		mHandler.startQuery(monthMillis, startTimeMillis, endTimeMillis);
 	}
 	

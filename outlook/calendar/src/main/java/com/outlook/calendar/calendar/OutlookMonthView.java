@@ -12,7 +12,7 @@ import android.view.View;
 
 import com.outlook.calendar.calendar.OutlookMonthViewAdapter.OutlookOnDayCellClicked;
 import com.outlook.calendar.calendar.OutlookMonthViewAdapter.SelectionPayload;
-import com.outlook.calendar.utils.OutlookCalenderUtils;
+import com.outlook.calendar.utils.OutlookCalendarUtils;
 
 /**
  * Created by ksachan on 7/4/17.
@@ -40,7 +40,7 @@ public class OutlookMonthView extends RecyclerView
 	{
 		setLayoutManager(new CustomGridLayoutManager(getContext(), SPAN_COUNT));
 		setHasFixedSize(true);
-		setMonthMillis(OutlookCalenderUtils.today());
+		setMonthMillis(OutlookCalendarUtils.today());
 	}
 	
 	public void setOnDateChangeListener(OnDateChangeListener listener)
@@ -82,21 +82,21 @@ public class OutlookMonthView extends RecyclerView
 	
 	void setSelectedDay(long dayMillis)
 	{
-		if (OutlookCalenderUtils.isNotTime(mMonthMillis))
+		if (OutlookCalendarUtils.isNotTime(mMonthMillis))
 		{
 			return;
 		}
-		if (OutlookCalenderUtils.isNotTime(dayMillis))
+		if (OutlookCalendarUtils.isNotTime(dayMillis))
 		{
-			mAdapter.setSelectedDay(OutlookCalenderUtils.NO_TIME_MILLIS);
+			mAdapter.setSelectedDay(OutlookCalendarUtils.NO_TIME_MILLIS);
 		}
-		else if (OutlookCalenderUtils.sameMonth(mMonthMillis, dayMillis))
+		else if (OutlookCalendarUtils.sameMonth(mMonthMillis, dayMillis))
 		{
 			mAdapter.setSelectedDay(dayMillis);
 		}
 		else
 		{
-			mAdapter.setSelectedDay(OutlookCalenderUtils.NO_TIME_MILLIS);
+			mAdapter.setSelectedDay(OutlookCalendarUtils.NO_TIME_MILLIS);
 		}
 	}
 	

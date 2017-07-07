@@ -7,7 +7,7 @@ import android.view.View;
 
 import com.outlook.calendar.agenda.OutlookAgendaView;
 import com.outlook.calendar.calendar.OutlookCalendarViewPager;
-import com.outlook.calendar.utils.OutlookCalenderUtils;
+import com.outlook.calendar.utils.OutlookCalendarUtils;
 
 /**
  * Created by ksachan on 7/5/17.
@@ -35,7 +35,7 @@ public class OutlookAgendaCalenderManager
 		
 		if (mSelectedDate < 0)
 		{
-			mSelectedDate = OutlookCalenderUtils.today();
+			mSelectedDate = OutlookCalendarUtils.today();
 		}
 		
 		calendarView.setSelectedDay(mSelectedDate);
@@ -63,7 +63,7 @@ public class OutlookAgendaCalenderManager
 	
 	private void updateTitle(long dayMillis)
 	{
-		CharSequence dayStr = OutlookCalenderUtils.toMonthString(mCollapsingToolbarLayout.getContext(), dayMillis);
+		CharSequence dayStr = OutlookCalendarUtils.toMonthString(mCollapsingToolbarLayout.getContext(), dayMillis);
 		// mTextView.setText(dayStr);
 		mCollapsingToolbarLayout.setTitle(dayStr);
 	}
@@ -91,5 +91,5 @@ public class OutlookAgendaCalenderManager
 	private AppCompatCheckedTextView mTextView;
 	private OutlookCalendarViewPager mCalendarView;
 	private OutlookAgendaView        mAgendaView;
-	private long      mSelectedDate = OutlookCalenderUtils.NO_TIME_MILLIS;
+	private long      mSelectedDate = OutlookCalendarUtils.NO_TIME_MILLIS;
 }

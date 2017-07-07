@@ -12,7 +12,7 @@ import android.util.Log;
 
 import com.outlook.calendar.decorator.OutlookDividerDectorator;
 import com.outlook.calendar.weather.OutlookWeather;
-import com.outlook.calendar.utils.OutlookCalenderUtils;
+import com.outlook.calendar.utils.OutlookCalendarUtils;
 
 /**
  * Created by ksachan on 7/4/17.
@@ -136,7 +136,7 @@ public class OutlookAgendaView extends RecyclerView
 	{
 		// clear view state
 		mPendingScrollPosition = NO_POSITION;
-		mPrevTimeMillis = OutlookCalenderUtils.NO_TIME_MILLIS;
+		mPrevTimeMillis = OutlookCalendarUtils.NO_TIME_MILLIS;
 		if (mAdapter != null)
 		{
 			int originalCount = mAdapter.getItemCount();
@@ -145,7 +145,7 @@ public class OutlookAgendaView extends RecyclerView
 			mAdapter.notifyItemRangeRemoved(0, originalCount);
 			mAdapter.append(getContext());
 			mAdapter.notifyItemRangeInserted(0, mAdapter.getItemCount());
-			setSelectedDay(OutlookCalenderUtils.today());
+			setSelectedDay(OutlookCalendarUtils.today());
 		}
 	}
 	
@@ -225,5 +225,5 @@ public class OutlookAgendaView extends RecyclerView
 	private OnDateChangeListener mListener;
 	private OutlookAgendaAdapter mAdapter;
 	private int  mPendingScrollPosition = NO_POSITION; // represent top scroll position to be set programmatically
-	private long mPrevTimeMillis        = OutlookCalenderUtils.NO_TIME_MILLIS;
+	private long mPrevTimeMillis        = OutlookCalendarUtils.NO_TIME_MILLIS;
 }

@@ -12,7 +12,7 @@ import android.text.format.DateUtils;
  * Created by ksachan on 7/4/17.
  */
 
-public class OutlookCalenderUtils
+public class OutlookCalendarUtils
 {
     public static boolean isNotTime(long timeMillis)
     {

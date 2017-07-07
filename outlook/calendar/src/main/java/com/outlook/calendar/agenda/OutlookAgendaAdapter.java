@@ -22,7 +22,7 @@ import com.outlook.calendar.OutlookEventCursor;
 import com.outlook.calender.R;
 import com.outlook.calendar.agenda.OutlookAgendaAdapter.AgendaViewHolder;
 import com.outlook.calendar.agenda.OutlookAgendaEventGroup.OutlookEventObserver;
-import com.outlook.calendar.utils.OutlookCalenderUtils;
+import com.outlook.calendar.utils.OutlookCalendarUtils;
 import com.outlook.calendar.weather.OutlookWeather;
 
 /**
@@ -251,7 +251,7 @@ public abstract class OutlookAgendaAdapter extends Adapter<AgendaViewHolder>
 		int count = BLOCK_SIZE;
 		if (mEventGroups.isEmpty())
 		{
-			long today = OutlookCalenderUtils.today();
+			long today = OutlookCalendarUtils.today();
 			for (int i = -count; i < count; i++)
 			{
 				mEventGroups.add(new OutlookAgendaEventGroup(context, today + DateUtils.DAY_IN_MILLIS * i));
@@ -352,10 +352,10 @@ public abstract class OutlookAgendaAdapter extends Adapter<AgendaViewHolder>
 				break;
 			case OutlookAgendaEventItem.DISPLAY_TYPE_START_TIME:
 			default:
-				contentHolder.textViewTime.setText(OutlookCalenderUtils.toTimeString(context, eventItem.mStartTimeMillis));
+				contentHolder.textViewTime.setText(OutlookCalendarUtils.toTimeString(context, eventItem.mStartTimeMillis));
 				break;
 			case OutlookAgendaEventItem.DISPLAY_TYPE_END_TIME:
-				String endTimeString = OutlookCalenderUtils.toTimeString(context, eventItem.mEndTimeMillis);
+				String endTimeString = OutlookCalendarUtils.toTimeString(context, eventItem.mEndTimeMillis);
 				contentHolder.textViewTime.setText(context.getString(R.string.end_time, endTimeString));
 				break;
 		}
@@ -377,14 +377,14 @@ public abstract class OutlookAgendaAdapter extends Adapter<AgendaViewHolder>
 	private void bindWeather(OutlookAgendaEventGroup groupItem, final HeaderViewHolder holder)
 	{
 		// bind weather for today and tomorrow if exist, hide UI otherwise
-		if (groupItem.mTimeMillis == OutlookCalenderUtils.today() && mWeather != null && mWeather.today != null)
+		if (groupItem.mTimeMillis == OutlookCalendarUtils.today() && mWeather != null && mWeather.today != null)
 		{
 			bindWeatherInfo(holder.textViewMorning, mWeather.today.morning);
 			bindWeatherInfo(holder.textViewAfternoon, mWeather.today.afternoon);
 			bindWeatherInfo(holder.textViewNight, mWeather.today.night);
 			holder.weather.setVisibility(View.VISIBLE);
 		}
-		else if (groupItem.mTimeMillis == OutlookCalenderUtils.today() + DateUtils.DAY_IN_MILLIS && mWeather != null && mWeather.tomorrow != null)
+		else if (groupItem.mTimeMillis == OutlookCalendarUtils.today() + DateUtils.DAY_IN_MILLIS && mWeather != null && mWeather.tomorrow != null)
 		{
 			bindWeatherInfo(holder.textViewMorning, mWeather.tomorrow.morning);
 			bindWeatherInfo(holder.textViewAfternoon, mWeather.tomorrow.afternoon);

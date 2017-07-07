@@ -23,7 +23,7 @@ import android.text.format.DateUtils;
 import android.widget.Toast;
 
 import com.outlook.calender.R;
-import com.outlook.calendar.utils.OutlookCalenderUtils;
+import com.outlook.calendar.utils.OutlookCalendarUtils;
 import retrofit2.Call;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -110,7 +110,7 @@ public class OutlookWeatherService extends IntentService
 		{
 			notifyLocationError();
 		}
-		long todaySeconds = OutlookCalenderUtils.today() / DateUtils.SECOND_IN_MILLIS, tomorrowSeconds = todaySeconds + DateUtils.DAY_IN_MILLIS / DateUtils.SECOND_IN_MILLIS;
+		long todaySeconds = OutlookCalendarUtils.today() / DateUtils.SECOND_IN_MILLIS, tomorrowSeconds = todaySeconds + DateUtils.DAY_IN_MILLIS / DateUtils.SECOND_IN_MILLIS;
 		persist(fetchForecast(location, todaySeconds), PREF_WEATHER_TODAY);
 		persist(fetchForecast(location, tomorrowSeconds), PREF_WEATHER_TOMORROW);
 		scheduleAlarm();

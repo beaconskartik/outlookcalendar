@@ -6,7 +6,7 @@ import android.os.Handler;
 import android.os.Parcel;
 
 import com.outlook.calendar.OutlookEventCursor;
-import com.outlook.calendar.utils.OutlookCalenderUtils;
+import com.outlook.calendar.utils.OutlookCalendarUtils;
 
 /**
  * Created by ksachan on 7/6/17.
@@ -16,7 +16,7 @@ public class OutlookAgendaEventGroup extends OutlookAgendaItem
 {
 	public OutlookAgendaEventGroup(Context context, long timeMillis)
 	{
-		super(OutlookCalenderUtils.toDayString(context, timeMillis), timeMillis);
+		super(OutlookCalendarUtils.toDayString(context, timeMillis), timeMillis);
 	}
 	
 	private OutlookAgendaEventGroup(Parcel source)

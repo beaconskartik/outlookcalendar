@@ -4,7 +4,7 @@ import android.os.Parcel;
 import android.text.format.DateUtils;
 
 import com.outlook.calendar.OutlookEventCursor;
-import com.outlook.calendar.utils.OutlookCalenderUtils;
+import com.outlook.calendar.utils.OutlookCalendarUtils;
 
 /**
  * Created by ksachan on 7/6/17.
@@ -24,8 +24,8 @@ public class OutlookAgendaEventItem
 		// all-day time in Calendar Provider is midnight in UTC, need to convert to local
 		if (mIsAllDay)
 		{
-			mStartTimeMillis = OutlookCalenderUtils.toLocalTimeZone(mStartTimeMillis);
-			mEndTimeMillis = OutlookCalenderUtils.toLocalTimeZone(mEndTimeMillis);
+			mStartTimeMillis = OutlookCalendarUtils.toLocalTimeZone(mStartTimeMillis);
+			mEndTimeMillis = OutlookCalendarUtils.toLocalTimeZone(mEndTimeMillis);
 		}
 		setDisplayType();
 	}
