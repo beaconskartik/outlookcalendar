@@ -55,6 +55,15 @@ For wheather, you need to generate a key from site : https://darksky.net/dev/log
 4) #### OutlookAgendaEventGroup : Place holder
 5) #### OutlookAgendaEventItem 
 6) #### OutlookAgendaEventList
+
+
+## TO DO List
+
+1) Writing unit test cases
+2) Syncing from single source i.e there is one data provider for both calendar and agenda view
+3) Adding Edit Event view 
+4) Adding Recipient Name as well in the Agenda View
+
   
                               
                                          
