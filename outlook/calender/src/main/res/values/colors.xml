@@ -5,6 +5,6 @@
     <color name="colorAccent">#FF4081</color>
 
     <color name="dot_color">#00C853</color>
-    <color name="circle_color">#00C853</color>
+    <color name="circle_color">#ff00</color>
     <color name="colorDivider">#1F000000</color>
 </resources>

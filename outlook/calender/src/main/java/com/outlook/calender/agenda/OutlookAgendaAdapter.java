@@ -2,6 +2,7 @@ package com.outlook.calender.agenda;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.os.Handler;
 import android.support.v4.util.Pair;
 import android.support.v7.text.AllCapsTransformationMethod;
 import android.support.v7.widget.RecyclerView;
@@ -208,15 +209,26 @@ public abstract class OutlookAgendaAdapter extends Adapter<AgendaViewHolder>
 	void prepend(Context context)
 	{
 		long daysMillis = mEventGroups.size() * DateUtils.DAY_IN_MILLIS;
-		int count = BLOCK_SIZE, inserted = 0;
+		int count = BLOCK_SIZE;
+		final int [] inserted = new int[1];
+		inserted[0] = 0;
 		for (int i = 0; i < count; i++)
 		{
 			OutlookAgendaEventGroup last = mEventGroups.get(mEventGroups.size() - 1 - i);
 			OutlookAgendaEventGroup first = new OutlookAgendaEventGroup(context, last.mTimeMillis - daysMillis);
-			inserted += first.itemCount() + 1;
+			inserted[0] += first.itemCount() + 1;
 			mEventGroups.add(0, first);
 		}
-		notifyItemRangeInserted(0, inserted);
+		
+		final Runnable runnable = new Runnable()
+		{
+			public void run()
+			{
+				notifyItemRangeInserted(0, inserted[0]);
+			}
+		};
+		mHandler.post(runnable);
+		
 		prune(false);
 	}
 	
@@ -242,15 +254,24 @@ public abstract class OutlookAgendaAdapter extends Adapter<AgendaViewHolder>
 		else
 		{
 			long daysMillis = mEventGroups.size() * DateUtils.DAY_IN_MILLIS;
-			int inserted = 0;
+			final int []inserted = new int[1];
+			inserted[0] = 0;
 			for (int i = 0; i < count; i++)
 			{
 				OutlookAgendaEventGroup first = mEventGroups.get(i);
 				OutlookAgendaEventGroup last = new OutlookAgendaEventGroup(context, first.mTimeMillis + daysMillis);
-				inserted += last.itemCount() + 1;
+				inserted[0] += last.itemCount() + 1;
 				mEventGroups.add(last);
 			}
-			notifyItemRangeInserted(getItemCount() - inserted + 1, inserted);
+			
+			final Runnable runnable = new Runnable()
+			{
+				public void run()
+				{
+					notifyItemRangeInserted(getItemCount() - inserted[0] + 1, inserted[0]);
+				}
+			};
+			mHandler.post(runnable);
 			prune(true);
 		}
 	}
@@ -276,7 +297,15 @@ public abstract class OutlookAgendaAdapter extends Adapter<AgendaViewHolder>
 	void unlockBinding()
 	{
 		mLock = false;
-		notifyItemRangeChanged(0, getItemCount());
+		
+		final Runnable runnable = new Runnable()
+		{
+			public void run()
+			{
+				notifyItemRangeChanged(0, getItemCount());
+			}
+		};
+		mHandler.post(runnable);
 	}
 	
 	private Pair<OutlookAgendaEventGroup, Integer> findGroup(long timeMillis)
@@ -310,15 +339,32 @@ public abstract class OutlookAgendaAdapter extends Adapter<AgendaViewHolder>
 			refreshCount = 1;
 			diff = Math.max(--diff, 0);
 		}
-		notifyItemRangeChanged(position + 1, refreshCount);
+		
+		final int []start = new int[1];
+		final int [] end = new int[1];
+		
+		start[0] = position + 1;
+		end[0] = refreshCount;
+		
 		if (diff > 0)
 		{
-			notifyItemRangeInserted(position + 1 + refreshCount, diff);
+			start[0] = position + 1 + refreshCount;
+			end[0] = diff;
 		}
 		else if (diff < 0)
 		{
-			notifyItemRangeRemoved(position + 1 + refreshCount, -diff);
+			start[0] = position + 1 + refreshCount;
+			end[0] = -diff;
 		}
+		
+		final Runnable runnable = new Runnable()
+		{
+			public void run()
+			{
+				notifyItemRangeChanged(start[0], end[0]);
+			}
+		};
+		mHandler.post(runnable);
 		group.mLastCursorCount = newCount;
 	}
 	
@@ -331,19 +377,29 @@ public abstract class OutlookAgendaAdapter extends Adapter<AgendaViewHolder>
 		}
 	}
 	
-	private void prune(boolean start)
+	private void prune(final boolean start)
 	{
 		if (mEventGroups.size() <= MAX_SIZE)
 		{
 			return;
 		}
-		int removed = 0, index = start ? 0 : MAX_SIZE;
+		final int [] removed = new int[1];
+		removed[0] = 0;
+		int index = start ? 0 : MAX_SIZE;
 		while (mEventGroups.size() > MAX_SIZE)
 		{
-			removed += mEventGroups.get(index).itemCount() + 1;
+			removed[0] += mEventGroups.get(index).itemCount() + 1;
 			mEventGroups.remove(index);
 		}
-		notifyItemRangeRemoved(start ? 0 : getItemCount(), removed);
+		
+		final Runnable runnable = new Runnable()
+		{
+			public void run()
+			{
+				notifyItemRangeRemoved(start ? 0 : getItemCount(), removed[0]);
+			}
+		};
+		mHandler.post(runnable);
 	}
 	
 	public static class AgendaViewHolder
@@ -399,4 +455,5 @@ public abstract class OutlookAgendaAdapter extends Adapter<AgendaViewHolder>
 	private final OutlookAgendaEventList mEventGroups          = new OutlookAgendaEventList(BLOCK_SIZE);
 	private final LayoutInflater mInflater;
 	private       boolean        mLock;
+	private Handler mHandler = new Handler();
 }
