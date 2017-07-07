@@ -1,24 +1,21 @@
 package com.outlook.calender;
 
-import java.util.Calendar;
-
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.AppBarLayout;
+import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.AppCompatCheckedTextView;
 import android.support.v7.widget.Toolbar;
-import android.text.format.DateUtils;
-import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View.OnClickListener;
+import android.view.View;
+import android.view.View.OnScrollChangeListener;
 import android.widget.Toast;
 
 import com.outlook.calender.agenda.OutlookAgendaAdapter;
@@ -34,38 +31,37 @@ public class OutlookActivity extends AppCompatActivity
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_outlook);
-        Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
         
-        FloatingActionButton fab = (FloatingActionButton)findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener()
+        mAppBarLayout = (AppBarLayout) findViewById(R.id.app_bar);
+        
+        mToolbar = (Toolbar)findViewById(R.id.toolbar);
+        setSupportActionBar(mToolbar);
+        mToolbar.hideOverflowMenu();
+    
+        mFab = (FloatingActionButton)findViewById(R.id.fab);
+        mFab.setOnClickListener(new View.OnClickListener()
         {
             @Override
             public void onClick(View view)
             {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG).setAction("Action", null).show();
+                mAppBarLayout.setExpanded(false, false);
+                mMenuItemExpandCalendar.setVisible(true);
             }
         });
-    
+        
+        mCollapsingToolbarLayout = (CollapsingToolbarLayout)findViewById(R.id.toolbar_layout);
         mCalendarView = (OutlookCalenderViewPager)findViewById(R.id.calendar_view);
         mAgendaView = (OutlookAgendaView)findViewById(R.id.agenda_view);
-        mToolbarCheckedTextView = (AppCompatCheckedTextView)findViewById(R.id.calender_toggle);
-        
-        init();
-    }
     
-    private void init()
-    {
-        // updating title
-        updateTitle(Calendar.getInstance());
-        
-        mToolbarCheckedTextView.setOnClickListener(new OnClickListener()
+        mAgendaView.setOnScrollChangeListener(new OnScrollChangeListener()
         {
             @Override
-            public void onClick(View v)
+            public void onScrollChange(View v, int scrollX, int scrollY, int oldScrollX, int oldScrollY)
             {
-                mToolbarCheckedTextView.toggle();
-                toggleCalendarView();
+                if (mMenuItemExpandCalendar != null)
+                {
+                    mMenuItemExpandCalendar.setVisible(true);
+                }
             }
         });
     }
@@ -75,6 +71,9 @@ public class OutlookActivity extends AppCompatActivity
     {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_outlook, menu);
+        
+        mMenuItemExpandCalendar = menu.findItem(R.id.expanded_calendar);
+        mMenuItemExpandCalendar.setVisible(false);
         return true;
     }
     
@@ -83,7 +82,8 @@ public class OutlookActivity extends AppCompatActivity
     {
         super.onPostCreate(savedInstanceState);
     
-        mOutlookAgendaCalenderManager = new OutlookAgendaCalenderManager(mToolbarCheckedTextView, mCalendarView, mAgendaView);
+        mOutlookAgendaCalenderManager = new OutlookAgendaCalenderManager( mCalendarView,
+                mAgendaView, mToolbar);
         
         if (checkPermissions())
         {
@@ -139,6 +139,11 @@ public class OutlookActivity extends AppCompatActivity
         {
             return true;
         }
+        else if (id == R.id.expanded_calendar)
+        {
+            mMenuItemExpandCalendar.setVisible(false);
+            mAppBarLayout.setExpanded(true, true);
+        }
         
         return super.onOptionsItemSelected(item);
     }
@@ -149,28 +154,13 @@ public class OutlookActivity extends AppCompatActivity
         mAgendaView.setAdapter(new OutlookAgendaCursorAdapter(this));
     }
     
-    private void updateTitle(Calendar calendar)
-    {
-        final int flags = DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_NO_MONTH_DAY | DateUtils.FORMAT_SHOW_YEAR;
-        final long millis = calendar.getTimeInMillis();
-        mToolbarCheckedTextView.setText(DateUtils.formatDateRange(this, millis, millis, flags));
-    }
-    
-    private void toggleCalendarView()
-    {
-        if (mToolbarCheckedTextView.isChecked())
-        {
-            mCalendarView.setVisibility(View.VISIBLE);
-        }
-        else
-        {
-            mCalendarView.setVisibility(View.GONE);
-        }
-    }
-    
+    private MenuItem                     mMenuItemExpandCalendar;
+    private CollapsingToolbarLayout     mCollapsingToolbarLayout;
+    private Toolbar                      mToolbar;
+    private AppBarLayout                 mAppBarLayout;
+    private FloatingActionButton         mFab;
     private OutlookAgendaCalenderManager mOutlookAgendaCalenderManager;
     private OutlookCalenderViewPager     mCalendarView;
     private OutlookAgendaView            mAgendaView;
     private OutlookAgendaAdapter         mAgendaAdapter;
-    private AppCompatCheckedTextView     mToolbarCheckedTextView;
 }

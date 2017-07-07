@@ -3,7 +3,9 @@ package com.outlook.calender;
 import java.util.Calendar;
 
 import android.support.annotation.NonNull;
+import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v7.widget.AppCompatCheckedTextView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 
@@ -17,8 +19,8 @@ import com.outlook.calender.utils.OutlookCalenderUtils;
 
 public class OutlookAgendaCalenderManager
 {
-	public OutlookAgendaCalenderManager(AppCompatCheckedTextView toolbarCheckedTextView, OutlookCalenderViewPager calendarView,
-										OutlookAgendaView agendaView)
+	public OutlookAgendaCalenderManager( OutlookCalenderViewPager calendarView,
+										OutlookAgendaView agendaView, Toolbar layout)
 	{
 		if (mCalendarView != null)
 		{
@@ -30,9 +32,10 @@ public class OutlookAgendaCalenderManager
 			mAgendaView.setOnDateChangeListener(null);
 		}
 		
-		mTextView = toolbarCheckedTextView;
+		mTextView = null;
 		mCalendarView = calendarView;
 		mAgendaView = agendaView;
+		mCollapsingToolbarLayout = layout;
 		
 		if (mSelectedDate < 0)
 		{
@@ -64,7 +67,9 @@ public class OutlookAgendaCalenderManager
 	
 	private void updateTitle(long dayMillis)
 	{
-		mTextView.setText(OutlookCalenderUtils.toMonthString(mTextView.getContext(), dayMillis));
+		CharSequence dayStr = OutlookCalenderUtils.toMonthString(mCollapsingToolbarLayout.getContext(), dayMillis);
+		// mTextView.setText(dayStr);
+		mCollapsingToolbarLayout.setTitle(dayStr);
 	}
 	
 	private final OutlookCalenderViewPager.OnChangeListener mCalendarListener = new OutlookCalenderViewPager.OnChangeListener()
@@ -86,8 +91,9 @@ public class OutlookAgendaCalenderManager
 		}
 	};
 	
+	private Toolbar mCollapsingToolbarLayout;
 	private AppCompatCheckedTextView          mTextView;
 	private OutlookCalenderViewPager mCalendarView;
 	private OutlookAgendaView        mAgendaView;
-	private long      mSelectedDate;
+	private long      mSelectedDate = OutlookCalenderUtils.NO_TIME_MILLIS;
 }

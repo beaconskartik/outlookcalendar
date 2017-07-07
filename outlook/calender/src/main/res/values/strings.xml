@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">outlook</string>
     <string name="action_settings">Settings</string>
+    <string name="action_expand_calendar">Calendar</string>
     <string name="no_event">No event</string>
     <string name="all_day">All day</string>
 </resources>

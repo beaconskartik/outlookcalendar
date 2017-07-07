@@ -42,7 +42,7 @@ public class OutlookActivityFragment extends Fragment
     
         mCalendarView = (OutlookCalenderViewPager)view.findViewById(R.id.calendar_view);
         mAgendaView = (OutlookAgendaView)view.findViewById(R.id.agenda_view);
-        mToolbarCheckedTextView = (AppCompatCheckedTextView)view.findViewById(R.id.calender_toggle);
+        // mToolbarCheckedTextView = (AppCompatCheckedTextView)view.findViewById(R.id.calender_toggle);
         
         init();
     }
@@ -62,7 +62,7 @@ public class OutlookActivityFragment extends Fragment
             }
         });
     
-        mOutlookAgendaCalenderManager = new OutlookAgendaCalenderManager(mToolbarCheckedTextView, mCalendarView, mAgendaView);
+        // mOutlookAgendaCalenderManager = new OutlookAgendaCalenderManager(mToolbarCheckedTextView, mCalendarView, mAgendaView,);
     }
     
     public void  loadEvents()
