@@ -40,10 +40,9 @@ public class OutlookAgendaView extends RecyclerView
 	@Override
 	public void onScrolled(int dx, int dy)
 	{
-		loadMore();
-		
 		if (dy != 0)
 		{
+			loadMore();
 			notifyDateChange();
 		}
 	}
@@ -54,11 +53,8 @@ public class OutlookAgendaView extends RecyclerView
 		super.onScrollStateChanged(state);
 		if (state == SCROLL_STATE_IDLE && mPendingScrollPosition != NO_POSITION)
 		{
-			if (mPendingScrollPosition == ((LinearLayoutManager)getLayoutManager()).findFirstVisibleItemPosition())
-			{
-				mPendingScrollPosition = NO_POSITION; // clear pending
-				mAdapter.unlockBinding();
-			}
+			mPendingScrollPosition = NO_POSITION; // clear pending
+			mAdapter.unlockBinding();
 		}
 	}
 	
@@ -113,6 +109,7 @@ public class OutlookAgendaView extends RecyclerView
 		if (mAdapter != null)
 		{
 			mAdapter.append(getContext());
+			getLayoutManager().scrollToPosition(mAdapter.getItemCount() / 2);
 		}
 		super.setAdapter(mAdapter);
 	}
@@ -132,6 +129,26 @@ public class OutlookAgendaView extends RecyclerView
 		}
 	}
 	
+	/**
+	 * Resets view to initial state, clears previous bindings if any
+	 */
+	public void reset()
+	{
+		// clear view state
+		mPendingScrollPosition = NO_POSITION;
+		mPrevTimeMillis = OutlookCalenderUtils.NO_TIME_MILLIS;
+		if (mAdapter != null)
+		{
+			int originalCount = mAdapter.getItemCount();
+			mAdapter.lockBinding();
+			mAdapter.deactivate();
+			mAdapter.notifyItemRangeRemoved(0, originalCount);
+			mAdapter.append(getContext());
+			mAdapter.notifyItemRangeInserted(0, mAdapter.getItemCount());
+			setSelectedDay(OutlookCalenderUtils.today());
+		}
+	}
+	
 	private void notifyDateChange()
 	{
 		int position = ((LinearLayoutManager)getLayoutManager()).findFirstVisibleItemPosition();
@@ -139,14 +156,19 @@ public class OutlookAgendaView extends RecyclerView
 		{
 			return;
 		}
-		long timeMillis = mAdapter.getAdapterItem(position).getTimeMillis();
-		if (mPrevTimeMillis != timeMillis)
+		OutlookAgendaItem outlookAgendaItem = mAdapter.getAdapterItem(position);
+		
+		if (outlookAgendaItem != null)
 		{
-			mPrevTimeMillis = timeMillis;
-			// only notify listener if scroll is not triggered programmatically (i.e. no pending)
-			if (mPendingScrollPosition == NO_POSITION && mListener != null)
+			long timeMillis = outlookAgendaItem.getTimeMillis();
+			if (mPrevTimeMillis != timeMillis)
 			{
-				mListener.onSelectedDayChange(timeMillis);
+				mPrevTimeMillis = timeMillis;
+				// only notify listener if scroll is not triggered programmatically (i.e. no pending)
+				if (mPendingScrollPosition == NO_POSITION && mListener != null)
+				{
+					mListener.onSelectedDayChange(timeMillis);
+				}
 			}
 		}
 	}

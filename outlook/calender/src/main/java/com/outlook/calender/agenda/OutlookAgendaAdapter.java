@@ -140,11 +140,14 @@ public abstract class OutlookAgendaAdapter extends Adapter<AgendaViewHolder>
 	 */
 	public final void bindEvents(long timeMillis, Cursor cursor)
 	{
-		Pair<OutlookAgendaEventGroup, Integer> pair = findGroup(timeMillis);
-		if (pair != null)
+		if (!mLock)
 		{
-			pair.first.setCursor(cursor, mOutlookEventObserver);
-			notifyEventsChanged(pair.first, pair.second);
+			Pair<OutlookAgendaEventGroup, Integer> pair = findGroup(timeMillis);
+			if (pair != null)
+			{
+				pair.first.setCursor(cursor, mOutlookEventObserver);
+				notifyEventsChanged(pair.first, pair.second);
+			}
 		}
 	}
 	
@@ -247,7 +250,7 @@ public abstract class OutlookAgendaAdapter extends Adapter<AgendaViewHolder>
 		if (mEventGroups.isEmpty())
 		{
 			long today = OutlookCalenderUtils.today();
-			for (int i = 0; i < count; i++)
+			for (int i = -count; i < count; i++)
 			{
 				mEventGroups.add(new OutlookAgendaEventGroup(context, today + DateUtils.DAY_IN_MILLIS * i));
 			}
@@ -371,10 +374,13 @@ public abstract class OutlookAgendaAdapter extends Adapter<AgendaViewHolder>
 	
 	private void loadEvents(int position)
 	{
-		OutlookAgendaEventGroup group = (OutlookAgendaEventGroup)getAdapterItem(position);
-		if (group.mCursor == null)
+		if (!mLock)
 		{
-			loadEvents(group.mTimeMillis);
+			OutlookAgendaEventGroup group = (OutlookAgendaEventGroup)getAdapterItem(position);
+			if (group.mCursor == null)
+			{
+				loadEvents(group.mTimeMillis);
+			}
 		}
 	}
 	
@@ -452,7 +458,10 @@ public abstract class OutlookAgendaAdapter extends Adapter<AgendaViewHolder>
 		@Override
 		public void onChange(long timeMillis)
 		{
-			loadEvents(timeMillis);
+			if (!mLock)
+			{
+				loadEvents(timeMillis);
+			}
 		}
 	};
 	private final OutlookAgendaEventList mEventGroups          = new OutlookAgendaEventList(BLOCK_SIZE);
