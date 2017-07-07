@@ -10,6 +10,8 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        buildConfigField "String", "FORECAST_IO_API_KEY", "\"f5683b40758cf04e37e7e1bac6176047\""
+
     }
     buildTypes {
         release {
@@ -26,6 +28,8 @@ dependencies {
     })
     compile 'com.android.support:appcompat-v7:25.3.0'
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
+    compile 'com.squareup.retrofit2:retrofit:2.1.0'
+    compile 'com.squareup.retrofit2:converter-gson:2.1.0'
     compile 'com.android.support:design:25.3.0'
     testCompile 'junit:junit:4.12'
 }

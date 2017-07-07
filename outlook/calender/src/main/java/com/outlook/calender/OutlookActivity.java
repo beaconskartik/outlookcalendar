@@ -1,17 +1,22 @@
 package com.outlook.calender;
 
 import android.Manifest;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.VisibleForTesting;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -23,6 +28,7 @@ import com.outlook.calender.agenda.OutlookAgendaCursorAdapter;
 import com.outlook.calender.agenda.OutlookAgendaView;
 import com.outlook.calender.calender.OutlookCalendarCursorAdapter;
 import com.outlook.calender.calender.OutlookCalenderViewPager;
+import com.outlook.calender.weather.OutlookWeatherService;
 
 public class OutlookActivity extends AppCompatActivity
 {
@@ -64,6 +70,9 @@ public class OutlookActivity extends AppCompatActivity
                 }
             }
         });
+        
+        PreferenceManager.getDefaultSharedPreferences(this)
+                .registerOnSharedPreferenceChangeListener(mWeatherChangeListener);
     }
     
     @Override
@@ -85,13 +94,22 @@ public class OutlookActivity extends AppCompatActivity
         mOutlookAgendaCalenderManager = new OutlookAgendaCalenderManager( mCalendarView,
                 mAgendaView, mToolbar);
         
-        if (checkPermissions())
+        if (checkCalendarPermissions())
         {
             loadEvents();
         }
         else
         {
-            requestPermissions();
+            requestCalendarPermissions();
+        }
+    
+        if (checkLocationPermissions())
+        {
+            loadWeather();
+        }
+        else
+        {
+            requestLocationPermissions();
         }
     }
     
@@ -101,14 +119,32 @@ public class OutlookActivity extends AppCompatActivity
         super.onAttachFragment(fragment);
     }
     
-    private boolean checkPermissions()
-    {
-        return (checkPermission(Manifest.permission.READ_CALENDAR) | checkPermission(Manifest.permission.WRITE_CALENDAR)) == PackageManager.PERMISSION_GRANTED;
+    protected boolean checkCalendarPermissions() {
+        return (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_CALENDAR) |
+                ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_CALENDAR)) ==
+               PackageManager.PERMISSION_GRANTED;
     }
     
-    private void requestPermissions()
-    {
-        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_CALENDAR, Manifest.permission.WRITE_CALENDAR}, 0);
+    @VisibleForTesting
+    protected boolean checkLocationPermissions() {
+        return ActivityCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+    }
+    
+    @VisibleForTesting
+    protected void requestCalendarPermissions() {
+        ActivityCompat.requestPermissions(this,
+                new String[]{
+                        Manifest.permission.READ_CALENDAR,
+                        Manifest.permission.WRITE_CALENDAR},
+                REQUEST_CODE_CALENDAR);
+    }
+    
+    @VisibleForTesting
+    protected void requestLocationPermissions() {
+        ActivityCompat.requestPermissions(this,
+                new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},
+                REQUEST_CODE_LOCATION);
     }
     
     protected int checkPermission(@NonNull String permission)
@@ -120,13 +156,17 @@ public class OutlookActivity extends AppCompatActivity
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults)
     {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (checkPermissions())
-        {
-            loadEvents();
-        }
-        else
-        {
-            Toast.makeText(this, "Please provide the Read Calender Permission to Run this App", Toast.LENGTH_SHORT).show();
+        switch (requestCode) {
+            case REQUEST_CODE_CALENDAR:
+                if (checkCalendarPermissions()) {
+                    loadEvents();
+                }
+                break;
+            case REQUEST_CODE_LOCATION:
+                if (checkLocationPermissions()) {
+                    loadWeather();
+                }
+                break;
         }
     }
     
@@ -152,8 +192,31 @@ public class OutlookActivity extends AppCompatActivity
     {
         mCalendarView.setCalendarAdapter(new OutlookCalendarCursorAdapter(this));
         mAgendaView.setAdapter(new OutlookAgendaCursorAdapter(this));
+        loadWeather();
     }
     
+    private void loadWeather() {
+        mAgendaView.setWeather(mWeatherEnabled ? OutlookWeatherService.getSyncedWeather(this) : null);
+    }
+    
+    
+    private static final int REQUEST_CODE_CALENDAR = 0;
+    private static final int REQUEST_CODE_LOCATION = 1;
+    
+    private final SharedPreferences.OnSharedPreferenceChangeListener mWeatherChangeListener =
+            new SharedPreferences.OnSharedPreferenceChangeListener() {
+                @Override
+                public void onSharedPreferenceChanged(SharedPreferences sharedPreferences,
+                                                      String key) {
+                    if (TextUtils.equals(key, OutlookWeatherService.PREF_WEATHER_TODAY) ||
+                        TextUtils.equals(key, OutlookWeatherService.PREF_WEATHER_TOMORROW)) {
+                        loadWeather();
+                    }
+                }
+            };
+    
+    private boolean mWeatherEnabled = true;
+    private boolean mPendingWeatherEnabled;
     private MenuItem                     mMenuItemExpandCalendar;
     private CollapsingToolbarLayout     mCollapsingToolbarLayout;
     private Toolbar                      mToolbar;

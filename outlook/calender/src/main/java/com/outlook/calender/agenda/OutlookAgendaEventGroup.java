@@ -7,6 +7,7 @@ import android.os.Handler;
 import android.os.Parcel;
 import android.provider.CalendarContract;
 
+import com.outlook.calender.OutlookEventCursor;
 import com.outlook.calender.utils.OutlookCalenderUtils;
 
 /**
@@ -38,16 +39,13 @@ public class OutlookAgendaEventGroup extends OutlookAgendaItem
 	{
 		if (mCursor == null || mCursor.getCount() == 0)
 		{
-			return new OutlookAgendaNoEvent(null, mTimeMillis, mTimeMillis);
+			return new OutlookAgendaNoEvent(null, mTimeMillis);
 		}
-		
 		mCursor.moveToPosition(index);
-		return new OutlookAgendaEventItem(mCursor.getString(mCursor.getColumnIndex(CalendarContract.Events.TITLE)), mTimeMillis,
-				mCursor.getLong(mCursor.getColumnIndex(CalendarContract.Events.DTSTART)),
-				mCursor.getInt(mCursor.getColumnIndex(CalendarContract.Events.ALL_DAY)) == 1);
+		return new OutlookAgendaEventItem(mTimeMillis, mCursor);
 	}
 	
-	public void setCursor(Cursor cursor, OutlookEventObserver outlookEventObserver)
+	public void setCursor(OutlookEventCursor cursor, OutlookEventObserver outlookEventObserver)
 	{
 		deactivate();
 		cursor.registerContentObserver(mContentObserver);
@@ -103,5 +101,5 @@ public class OutlookAgendaEventGroup extends OutlookAgendaItem
 	
 	OutlookEventObserver mOutlookEventObserver;
 	int mLastCursorCount = 0;
-	Cursor mCursor;
+	OutlookEventCursor mCursor;
 }

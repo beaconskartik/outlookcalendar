@@ -1,22 +1,30 @@
 package com.outlook.calender.agenda;
 
 import android.content.Context;
+import android.content.Intent;
+import android.content.res.TypedArray;
 import android.database.Cursor;
+import android.graphics.drawable.Drawable;
 import android.os.Handler;
+import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.util.Pair;
 import android.support.v7.text.AllCapsTransformationMethod;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.Adapter;
+import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.outlook.calender.OutlookEventCursor;
 import com.outlook.calender.R;
 import com.outlook.calender.agenda.OutlookAgendaAdapter.AgendaViewHolder;
 import com.outlook.calender.agenda.OutlookAgendaEventGroup.OutlookEventObserver;
 import com.outlook.calender.utils.OutlookCalenderUtils;
+import com.outlook.calender.weather.OutlookWeather;
 
 /**
  * Created by ksachan on 7/4/17.
@@ -26,8 +34,25 @@ public abstract class OutlookAgendaAdapter extends Adapter<AgendaViewHolder>
 {
 	public OutlookAgendaAdapter(Context context)
 	{
-		mContext = context;
 		mInflater = LayoutInflater.from(context);
+		mTransparentColor = ContextCompat.getColor(context, android.R.color.transparent);
+		TypedArray ta = context.getTheme().obtainStyledAttributes(new int[]{android.R.attr.textColorTertiary});
+		mIconTint = ta.getColor(0, 0);
+		ta.recycle();
+		TypedArray colors = context.getResources().obtainTypedArray(R.array.calendar_colors);
+		if (colors.length() > 0)
+		{
+			mColors = new int[colors.length()];
+			for (int i = 0; i < colors.length(); i++)
+			{
+				mColors[i] = colors.getColor(i, mTransparentColor);
+			}
+		}
+		else
+		{
+			mColors = new int[]{mTransparentColor};
+		}
+		colors.recycle();
 	}
 	
 	@Override
@@ -52,47 +77,25 @@ public abstract class OutlookAgendaAdapter extends Adapter<AgendaViewHolder>
 	}
 	
 	@Override
-	public void onBindViewHolder(AgendaViewHolder agendaViewHolder, int position)
+	public void onBindViewHolder(AgendaViewHolder holder, int position)
 	{
-		if (mLock)
-		{
-			return;
-		}
-		
-		OutlookAgendaItem item = getAdapterItem(position);
-		if (agendaViewHolder instanceof HeaderViewHolder)
+		final OutlookAgendaItem item = getAdapterItem(position);
+		bindTitle(item, holder);
+		if (item instanceof OutlookAgendaEventGroup)
 		{
 			loadEvents(position);
-			((HeaderViewHolder)agendaViewHolder).textView.setText(item.mTitle);
+			bindWeather((OutlookAgendaEventGroup)item, (HeaderViewHolder)holder);
 		}
 		else
 		{
-			ContentViewHolder contentHolder = (ContentViewHolder)agendaViewHolder;
-			if (item instanceof OutlookAgendaNoEvent)
-			{
-				contentHolder.textViewTime.setVisibility(View.GONE);
-				contentHolder.textViewTitle.setText(R.string.no_event);
-			}
-			else
-			{
-				OutlookAgendaEventItem eventItem = (OutlookAgendaEventItem)item;
-				contentHolder.textViewTime.setVisibility(View.VISIBLE);
-				if (eventItem.mIsAllDay)
-				{
-					contentHolder.textViewTime.setText(R.string.all_day);
-				}
-				else
-				{
-					contentHolder.textViewTime.setText(OutlookCalenderUtils.toTimeString(contentHolder.textViewTime.getContext(), eventItem.mStartTimeMillis));
-				}
-				contentHolder.textViewTitle.setText(item.mTitle);
-			}
-			contentHolder.itemView.setOnClickListener(new View.OnClickListener()
+			bindTime((OutlookAgendaEventItem)item, (ContentViewHolder)holder);
+			bindColor((OutlookAgendaEventItem)item, (ContentViewHolder)holder);
+			holder.itemView.setOnClickListener(new View.OnClickListener()
 			{
 				@Override
 				public void onClick(View v)
 				{
-					// TODO
+					
 				}
 			});
 		}
@@ -138,7 +141,7 @@ public abstract class OutlookAgendaAdapter extends Adapter<AgendaViewHolder>
 	 * @see {@link #loadEvents(long)}
 	 * @see {@link #deactivate()}
 	 */
-	public final void bindEvents(long timeMillis, Cursor cursor)
+	public final void bindEvents(long timeMillis, OutlookEventCursor cursor)
 	{
 		if (!mLock)
 		{
@@ -312,6 +315,99 @@ public abstract class OutlookAgendaAdapter extends Adapter<AgendaViewHolder>
 		mHandler.post(runnable);
 	}
 	
+	void setWeather(@Nullable OutlookWeather weather)
+	{
+		mWeather = weather;
+		notifyItemRangeChanged(0, getItemCount());
+	}
+	
+	private void bindTitle(OutlookAgendaItem item, ViewHolder holder)
+	{
+		if (item instanceof OutlookAgendaEventGroup)
+		{
+			((HeaderViewHolder)holder).textView.setText(item.mTitle);
+		}
+		else if (item instanceof OutlookAgendaNoEvent)
+		{
+			((ContentViewHolder)holder).textViewTitle.setText(R.string.no_event);
+		}
+		else
+		{
+			((ContentViewHolder)holder).textViewTitle.setText(item.mTitle);
+		}
+	}
+	
+	private void bindTime(OutlookAgendaEventItem eventItem, ContentViewHolder contentHolder)
+	{
+		if (eventItem instanceof OutlookAgendaNoEvent)
+		{
+			contentHolder.textViewTime.setVisibility(View.GONE);
+			return;
+		}
+		contentHolder.textViewTime.setVisibility(View.VISIBLE);
+		Context context = contentHolder.textViewTime.getContext();
+		switch (eventItem.mDisplayType)
+		{
+			case OutlookAgendaEventItem.DISPLAY_TYPE_ALL_DAY:
+				contentHolder.textViewTime.setText(R.string.all_day);
+				break;
+			case OutlookAgendaEventItem.DISPLAY_TYPE_START_TIME:
+			default:
+				contentHolder.textViewTime.setText(OutlookCalenderUtils.toTimeString(context, eventItem.mStartTimeMillis));
+				break;
+			case OutlookAgendaEventItem.DISPLAY_TYPE_END_TIME:
+				String endTimeString = OutlookCalenderUtils.toTimeString(context, eventItem.mEndTimeMillis);
+				contentHolder.textViewTime.setText(context.getString(R.string.end_time, endTimeString));
+				break;
+		}
+	}
+	
+	private void bindColor(OutlookAgendaEventItem item, ContentViewHolder holder)
+	{
+		if (item instanceof OutlookAgendaNoEvent)
+		{
+			holder.background.setBackgroundColor(mTransparentColor);
+		}
+		else
+		{
+			int color = mColors[(int)(Math.abs(item.mCalendarId) % mColors.length)];
+			holder.background.setBackgroundColor(color);
+		}
+	}
+	
+	private void bindWeather(OutlookAgendaEventGroup groupItem, final HeaderViewHolder holder)
+	{
+		// bind weather for today and tomorrow if exist, hide UI otherwise
+		if (groupItem.mTimeMillis == OutlookCalenderUtils.today() && mWeather != null && mWeather.today != null)
+		{
+			bindWeatherInfo(holder.textViewMorning, mWeather.today.morning);
+			bindWeatherInfo(holder.textViewAfternoon, mWeather.today.afternoon);
+			bindWeatherInfo(holder.textViewNight, mWeather.today.night);
+			holder.weather.setVisibility(View.VISIBLE);
+		}
+		else if (groupItem.mTimeMillis == OutlookCalenderUtils.today() + DateUtils.DAY_IN_MILLIS && mWeather != null && mWeather.tomorrow != null)
+		{
+			bindWeatherInfo(holder.textViewMorning, mWeather.tomorrow.morning);
+			bindWeatherInfo(holder.textViewAfternoon, mWeather.tomorrow.afternoon);
+			bindWeatherInfo(holder.textViewNight, mWeather.tomorrow.night);
+			holder.weather.setVisibility(View.VISIBLE);
+		}
+		else
+		{
+			holder.weather.setVisibility(View.GONE);
+		}
+	}
+	
+	private void bindWeatherInfo(TextView textView, OutlookWeather.WeatherInfo info)
+	{
+		Drawable icon = info.getIcon(textView.getContext(), mIconTint);
+		textView.setCompoundDrawablesWithIntrinsicBounds(icon, null, null, null);
+		if (info.temperature != null)
+		{
+			textView.setText(textView.getContext().getString(R.string.fahrenheit, info.temperature));
+		}
+	}
+	
 	private Pair<OutlookAgendaEventGroup, Integer> findGroup(long timeMillis)
 	{
 		int position = 0;
@@ -422,12 +518,20 @@ public abstract class OutlookAgendaAdapter extends Adapter<AgendaViewHolder>
 			extends AgendaViewHolder
 	{
 		final TextView textView;
+		final TextView textViewMorning;
+		final TextView textViewAfternoon;
+		final TextView textViewNight;
+		final View     weather;
 		
 		public HeaderViewHolder(View itemView)
 		{
 			super(itemView);
-			textView = (TextView)itemView;
+			textView = (TextView)itemView.findViewById(R.id.text_view_title);
 			textView.setTransformationMethod(new AllCapsTransformationMethod(textView.getContext()));
+			weather = itemView.findViewById(R.id.weather);
+			textViewMorning = (TextView)itemView.findViewById(R.id.text_view_morning);
+			textViewAfternoon = (TextView)itemView.findViewById(R.id.text_view_afternoon);
+			textViewNight = (TextView)itemView.findViewById(R.id.text_view_night);
 		}
 	}
 	
@@ -436,12 +540,14 @@ public abstract class OutlookAgendaAdapter extends Adapter<AgendaViewHolder>
 	{
 		final TextView textViewTitle;
 		final TextView textViewTime;
+		final View     background;
 		
 		public ContentViewHolder(View itemView)
 		{
 			super(itemView);
 			textViewTitle = (TextView)itemView.findViewById(R.id.text_view_title);
 			textViewTime = (TextView)itemView.findViewById(R.id.text_view_time);
+			background = itemView.findViewById(R.id.background);
 		}
 	}
 	
@@ -468,4 +574,8 @@ public abstract class OutlookAgendaAdapter extends Adapter<AgendaViewHolder>
 	private final LayoutInflater mInflater;
 	private       boolean        mLock;
 	private Handler mHandler = new Handler();
+	private final int            mTransparentColor;
+	private final int            mIconTint;
+	private final int            mColors[];
+	private       OutlookWeather mWeather;
 }

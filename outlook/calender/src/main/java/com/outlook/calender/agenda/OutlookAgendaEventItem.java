@@ -1,6 +1,10 @@
 package com.outlook.calender.agenda;
 
 import android.os.Parcel;
+import android.text.format.DateUtils;
+
+import com.outlook.calender.OutlookEventCursor;
+import com.outlook.calender.utils.OutlookCalenderUtils;
 
 /**
  * Created by ksachan on 7/6/17.
@@ -9,26 +13,72 @@ import android.os.Parcel;
 public class OutlookAgendaEventItem
 		extends OutlookAgendaItem
 {
-	public OutlookAgendaEventItem(String title, long timeMillis, long startTimeMillis, boolean allday)
+	public OutlookAgendaEventItem(long timeMillis, OutlookEventCursor cursor)
+	{
+		super(cursor.getTitle(), timeMillis);
+		mId = cursor.getId();
+		mCalendarId = cursor.getCalendarId();
+		mStartTimeMillis = cursor.getDateTimeStart();
+		mEndTimeMillis = cursor.getDateTimeEnd();
+		mIsAllDay = cursor.getAllDay();
+		// all-day time in Calendar Provider is midnight in UTC, need to convert to local
+		if (mIsAllDay)
+		{
+			mStartTimeMillis = OutlookCalenderUtils.toLocalTimeZone(mStartTimeMillis);
+			mEndTimeMillis = OutlookCalenderUtils.toLocalTimeZone(mEndTimeMillis);
+		}
+		setDisplayType();
+	}
+	
+	OutlookAgendaEventItem(String title, long timeMillis)
 	{
 		super(title, timeMillis);
-		mStartTimeMillis = startTimeMillis;
-		mIsAllDay = allday;
 	}
 	
 	protected OutlookAgendaEventItem(Parcel source)
 	{
 		super(source);
+		mId = source.readLong();
+		mCalendarId = source.readLong();
 		mStartTimeMillis = source.readLong();
-		mIsAllDay = source.readInt()  == 1;
+		mEndTimeMillis = source.readLong();
+		mIsAllDay = source.readInt() == 1;
+		mDisplayType = source.readInt();
 	}
 	
 	@Override
 	public void writeToParcel(Parcel dest, int flags)
 	{
 		super.writeToParcel(dest, flags);
+		dest.writeLong(mId);
+		dest.writeLong(mCalendarId);
 		dest.writeLong(mStartTimeMillis);
+		dest.writeLong(mEndTimeMillis);
 		dest.writeInt(mIsAllDay ? 1 : 0);
+		dest.writeInt(mDisplayType);
+	}
+	
+	private void setDisplayType()
+	{
+		if (mIsAllDay)
+		{
+			mDisplayType = DISPLAY_TYPE_ALL_DAY;
+		}
+		else if (mStartTimeMillis >= mTimeMillis)
+		{
+			// start within agenda date
+			mDisplayType = DISPLAY_TYPE_START_TIME;
+		}
+		else if (mEndTimeMillis < mTimeMillis + DateUtils.DAY_IN_MILLIS)
+		{
+			// start before, end within agenda date
+			mDisplayType = DISPLAY_TYPE_END_TIME;
+		}
+		else
+		{
+			// start before, end after agenda date
+			mDisplayType = DISPLAY_TYPE_ALL_DAY;
+		}
 	}
 	
 	public static Creator<OutlookAgendaEventItem> CREATOR = new Creator<OutlookAgendaEventItem>()
@@ -46,6 +96,14 @@ public class OutlookAgendaEventItem
 		}
 	};
 	
-	protected  long mStartTimeMillis;
-	protected boolean mIsAllDay;
+	static final int DISPLAY_TYPE_START_TIME = 0;
+	static final int DISPLAY_TYPE_ALL_DAY    = 1;
+	static final int DISPLAY_TYPE_END_TIME   = 2;
+	
+	long    mId;
+	long    mCalendarId;
+	long    mStartTimeMillis;
+	long    mEndTimeMillis;
+	boolean mIsAllDay;
+	int mDisplayType = DISPLAY_TYPE_START_TIME;
 }

@@ -1,11 +1,9 @@
 package com.outlook.calender.agenda;
 
 import android.content.Context;
-import android.provider.CalendarContract;
 import android.support.v7.widget.RecyclerView;
 import android.text.format.DateUtils;
 
-import com.outlook.calender.OutlookCalendarEventQueryHandler;
 import com.outlook.calender.event.OutlookDayEventQueryHanlder;
 
 /**

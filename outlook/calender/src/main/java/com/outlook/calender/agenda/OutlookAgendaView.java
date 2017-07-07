@@ -14,6 +14,7 @@ import android.util.Log;
 
 import com.outlook.calender.decorator.OutlookDividerDectorator;
 import com.outlook.calender.utils.OutlookCalenderUtils;
+import com.outlook.calender.weather.OutlookWeather;
 
 /**
  * Created by ksachan on 7/4/17.
@@ -119,13 +120,14 @@ public class OutlookAgendaView extends RecyclerView
 		setHasFixedSize(true);
 		setLayoutManager(new AgendaLinearLayoutManager(getContext()));
 		addItemDecoration(new OutlookDividerDectorator(getContext()));
-		getLayoutManager().scrollToPosition(OutlookAgendaAdapter.MONTH_SIZE * 2);
-		
-		if (isInEditMode())
+		setItemAnimator(null);
+	}
+	
+	public void setWeather(@Nullable OutlookWeather weather)
+	{
+		if (mAdapter != null)
 		{
-			setAdapter(new OutlookAgendaAdapter(getContext())
-			{
-			});
+			mAdapter.setWeather(weather);
 		}
 	}
 	
@@ -224,6 +226,6 @@ public class OutlookAgendaView extends RecyclerView
 	
 	private OnDateChangeListener mListener;
 	private OutlookAgendaAdapter mAdapter;
-	private       int      mPendingScrollPosition = NO_POSITION; // represent top scroll position to be set programmatically
-	private       long     mPrevTimeMillis        = OutlookCalenderUtils.NO_TIME_MILLIS;
+	private int  mPendingScrollPosition = NO_POSITION; // represent top scroll position to be set programmatically
+	private long mPrevTimeMillis        = OutlookCalenderUtils.NO_TIME_MILLIS;
 }

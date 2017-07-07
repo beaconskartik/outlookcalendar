@@ -3,6 +3,7 @@ package com.outlook.calender.event;
 import android.content.ContentResolver;
 import android.database.Cursor;
 
+import com.outlook.calender.OutlookEventCursor;
 import com.outlook.calender.calender.OutlookCalendarCursorAdapter;
 
 /**
@@ -21,7 +22,7 @@ public class OutlookMonthEventQueryHanlder extends OutlookEventQueryHandler
 	}
 	
 	@Override
-	protected void onQueryComplete(int token, Object cookie, Cursor cursor)
+	protected void handleQueryComplete(int token, Object cookie, OutlookEventCursor cursor)
 	{
 		mAdapter.bindEvents((Long)cookie, cursor);
 	}
