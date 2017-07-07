@@ -26,11 +26,7 @@ public abstract class OutlookEventQueryHandler
 						endTimeMillis), "0"}, CalendarContract.Events.DTSTART + " ASC");
 	}
 	
-	private static final String[] EVENTS_PROJECTION = new String[]{
-			CalendarContract.Events._ID,
-			CalendarContract.Events.CALENDAR_ID,
+	private static final String[] EVENTS_PROJECTION = new String[]{CalendarContract.Events._ID, CalendarContract.Events.CALENDAR_ID,
 			CalendarContract.Events.DTSTART,
-			CalendarContract.Events.DTEND,
-			CalendarContract.Events.ALL_DAY,
-			CalendarContract.Events.TITLE};
+			CalendarContract.Events.DTEND, CalendarContract.Events.ALL_DAY, CalendarContract.Events.TITLE};
 }

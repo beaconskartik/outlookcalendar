@@ -119,6 +119,7 @@ public abstract class OutlookAgendaAdapter extends Adapter<AgendaViewHolder>
 	
 	/**
 	 * Load event for given day
+	 *
 	 * @param timeMillis
 	 */
 	protected void loadEvents(long timeMillis)
@@ -210,7 +211,7 @@ public abstract class OutlookAgendaAdapter extends Adapter<AgendaViewHolder>
 	{
 		long daysMillis = mEventGroups.size() * DateUtils.DAY_IN_MILLIS;
 		int count = BLOCK_SIZE;
-		final int [] inserted = new int[1];
+		final int[] inserted = new int[1];
 		inserted[0] = 0;
 		for (int i = 0; i < count; i++)
 		{
@@ -254,7 +255,7 @@ public abstract class OutlookAgendaAdapter extends Adapter<AgendaViewHolder>
 		else
 		{
 			long daysMillis = mEventGroups.size() * DateUtils.DAY_IN_MILLIS;
-			final int []inserted = new int[1];
+			final int[] inserted = new int[1];
 			inserted[0] = 0;
 			for (int i = 0; i < count; i++)
 			{
@@ -340,8 +341,8 @@ public abstract class OutlookAgendaAdapter extends Adapter<AgendaViewHolder>
 			diff = Math.max(--diff, 0);
 		}
 		
-		final int []start = new int[1];
-		final int [] end = new int[1];
+		final int[] start = new int[1];
+		final int[] end = new int[1];
 		
 		start[0] = position + 1;
 		end[0] = refreshCount;
@@ -383,7 +384,7 @@ public abstract class OutlookAgendaAdapter extends Adapter<AgendaViewHolder>
 		{
 			return;
 		}
-		final int [] removed = new int[1];
+		final int[] removed = new int[1];
 		removed[0] = 0;
 		int index = start ? 0 : MAX_SIZE;
 		while (mEventGroups.size() > MAX_SIZE)
@@ -415,10 +416,11 @@ public abstract class OutlookAgendaAdapter extends Adapter<AgendaViewHolder>
 			extends AgendaViewHolder
 	{
 		final TextView textView;
+		
 		public HeaderViewHolder(View itemView)
 		{
 			super(itemView);
-			textView = (TextView) itemView;
+			textView = (TextView)itemView;
 			textView.setTransformationMethod(new AllCapsTransformationMethod(textView.getContext()));
 		}
 	}
@@ -428,19 +430,20 @@ public abstract class OutlookAgendaAdapter extends Adapter<AgendaViewHolder>
 	{
 		final TextView textViewTitle;
 		final TextView textViewTime;
+		
 		public ContentViewHolder(View itemView)
 		{
 			super(itemView);
-			textViewTitle = (TextView) itemView.findViewById(R.id.text_view_title);
-			textViewTime = (TextView) itemView.findViewById(R.id.text_view_time);
+			textViewTitle = (TextView)itemView.findViewById(R.id.text_view_title);
+			textViewTime = (TextView)itemView.findViewById(R.id.text_view_time);
 		}
 	}
 	
 	public static final int MONTH_SIZE = 31;
 	
 	private Context mContext;
-	private static final int BLOCK_SIZE = MONTH_SIZE * 2;
-	private static final         int MAX_SIZE          = MONTH_SIZE * 3;
+	private static final int BLOCK_SIZE        = MONTH_SIZE * 2;
+	private static final int MAX_SIZE          = MONTH_SIZE * 3;
 	private static final int VIEW_TYPE_HEADER  = 0;
 	private static final int VIEW_TYPE_CONTENT = 1;
 	

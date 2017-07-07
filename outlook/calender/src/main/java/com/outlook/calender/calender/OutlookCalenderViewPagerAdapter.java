@@ -120,13 +120,18 @@ public class OutlookCalenderViewPagerAdapter extends PagerAdapter
     
     private void bindSelectedDay(int position)
     {
-        if (mMonthViews.get(position) != null)
+        if (isValidPosForMonth(position) && mMonthViews.get(position) != null)
         {
             mMonthViews.get(position).setSelectedDay(mSelectedDay);
         }
     }
     
-    public void setSelectedDay(int position, @NonNull long selectedDay, boolean notifySelf)
+    private  boolean isValidPosForMonth(int pos)
+    {
+        return pos > -1 && pos < mMonthViews.size();
+    }
+    
+    public void setSelectedDay(int position, long selectedDay, boolean notifySelf)
     {
         mSelectedDay = selectedDay;
         if (notifySelf)

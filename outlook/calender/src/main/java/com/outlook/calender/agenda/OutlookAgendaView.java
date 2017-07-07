@@ -10,6 +10,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.LinearSmoothScroller;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
+import android.util.Log;
 
 import com.outlook.calender.decorator.OutlookDividerDectorator;
 import com.outlook.calender.utils.OutlookCalenderUtils;
@@ -157,6 +158,19 @@ public class OutlookAgendaView extends RecyclerView
 		public AgendaLinearLayoutManager(Context context)
 		{
 			super(context);
+		}
+		
+		@Override
+		public void onLayoutChildren(Recycler recycler, State state)
+		{
+			try
+			{
+				super.onLayoutChildren(recycler, state);
+			}
+			catch (IndexOutOfBoundsException e)
+			{
+				Log.e("outllook_debug", " oops encounter an issue : " + e);
+			}
 		}
 		
 		@Override
